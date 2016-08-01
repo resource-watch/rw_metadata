@@ -1,6 +1,6 @@
 {
     "logger": {
-        "name": "rw-adapter-csv",
+        "name": "rw-metadata",
         "level": "info",
         "toFile": false,
         "dirLogFile": null
