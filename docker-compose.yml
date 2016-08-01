@@ -1,0 +1,13 @@
+prod:
+  image: vizzuality/rw-metadata:1.0.0${STAGING}
+  ports:
+    - "5000"
+  env_file:
+    - prod.env
+  links:
+    - redis
+  command: start
+  restart: always
+  log_driver: "gelf"
+  log_opt:
+    gelf-address: ${GELF_ADDRESS}
