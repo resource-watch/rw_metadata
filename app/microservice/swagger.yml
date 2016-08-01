@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
-  title: GFW GeoStore API
-  description: Global Forest Watch - GeoStore API
+  title: RW Metadata API
+  description: Resource Watch - Metadata API
   version: "1.0.0"
 host: example.vizzuality.com
 
