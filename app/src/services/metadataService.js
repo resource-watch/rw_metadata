@@ -4,6 +4,7 @@ const logger = require('logger');
 const config = require('config');
 const Metadata = require('models/metadata');
 const MetadataNotFound = require('errors/metadataNotFound');
+const MetadataDuplicated = require('errors/metadataDuplicated');
 
 class MetadataService {
     static * query(dataset, application){
@@ -28,7 +29,7 @@ class MetadataService {
         logger.debug(exists);
         if(exists){
             logger.error('Metadata exists!!');
-            throw new MetadataNotFound(`Metadata with dataset ${dataset} and application ${application} exists`);
+            throw new MetadataDuplicated(`Metadata with dataset ${dataset} and application ${application} exists`);
         }
         logger.debug('Creating metadata');
         let metadata = new Metadata({

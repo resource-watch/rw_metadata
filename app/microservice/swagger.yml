@@ -14,27 +14,53 @@ produces:
   - application/vnd.api+json
 
 paths:
-  /geostore/{id}:
+  /metadata/{dataset}:
     get:
-      description: Returns geostore based on a single ID, if the geostore not exist return 404
-      operationId: getGeoStoreById
+      description: Returns metadatas filtered by dataset
+      operationId: queryByDataset
       produces:
         - application/vnd.api+json
       tags:
-        - GeoStore
+        - METADATA
       parameters:
-        - name: id
+        - name: dataset
           in: path
-          description: ID of geostore to fetch
+          description: ID of dataset
           required: true
           type: string
       responses:
         200:
-          description: Geostore obtained
+          description: Metadatas obtained
           schema:
-            $ref: '#/definitions/GeoStoreAPI'
+            $ref: '#/definitions/MetadataAPI'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+    delete:
+      description: Remove all metadata of a dataset
+      operationId: deleteByDataset
+      produces:
+        - application/vnd.api+json
+      tags:
+        - METADATA
+      parameters:
+        - name: dataset
+          in: path
+          description: ID of dataset
+          required: true
+          type: string
+      responses:
+        200:
+          description: Metadatas removed
+          schema:
+            $ref: '#/definitions/MetadataAPI'
         404:
-          description: Geostore not found
+          description: Metadata not found
           schema:
             $ref: '#/definitions/Errors'
         500:
@@ -45,27 +71,145 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Errors'
-  /geostore:
-    post:
-      summary: Create geostore
-      description: Create Geostore
+  /metadata/{dataset}/{application}:
+    get:
+      description: Returns metadatas filtered by dataset
+      operationId: queryByDatasetAndApplication
       produces:
         - application/vnd.api+json
       tags:
-        - GeoStore
-      operationId: createGeoStore
+        - METADATA
       parameters:
-        - name: geoStore
-          in: body
-          description: GeoStore to save
+        - name: dataset
+          in: path
+          description: ID of dataset
           required: true
-          schema:
-            $ref: '#/definitions/Features'
+          type: string
+        - name: application
+          in: path
+          description: Slug of application (gfw,rw,prep)
+          required: true
+          type: string
       responses:
         200:
-          description: The object created
+          description: Metadatas obtained
           schema:
-            $ref: '#/definitions/GeoStoreAPI'
+            $ref: '#/definitions/MetadataAPI'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+    post:
+      summary: Create metadata
+      description: Create Metadata
+      produces:
+        - application/vnd.api+json
+      tags:
+        - METADATA
+      operationId: create
+      parameters:
+        - name: dataset
+          in: path
+          description: ID of dataset
+          required: true
+          type: string
+        - name: application
+          in: path
+          description: Slug of application (gfw,rw,prep)
+          required: true
+          type: string
+        - name: metadata
+          in: body
+          description: Metadata to save. Free object
+          required: true
+          schema:
+            $ref: '#/definitions/Metadata'
+      responses:
+        200:
+          description: The Metadata created
+          schema:
+            $ref: '#/definitions/MetadataAPI'
+        400:
+          description: Validate error or metadata duplicated
+          schema:
+            $ref: '#/definitions/Errors'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+    delete:
+      description: Remove metadata of a dataset and an application
+      operationId: deleteByDatasetAndApplication
+      produces:
+        - application/vnd.api+json
+      tags:
+        - METADATA
+      parameters:
+        - name: dataset
+          in: path
+          description: ID of dataset
+          required: true
+          type: string
+        - name: application
+          in: path
+          description: Slug of application (gfw,rw,prep)
+          required: true
+          type: string
+      responses:
+        200:
+          description: Metadatas removed
+          schema:
+            $ref: '#/definitions/MetadataAPI'
+        404:
+          description: Metadata not found
+          schema:
+            $ref: '#/definitions/Errors'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+    patch:
+      summary: Update metadata
+      description: Update Metadata
+      produces:
+        - application/vnd.api+json
+      tags:
+        - METADATA
+      operationId: update
+      parameters:
+        - name: dataset
+          in: path
+          description: ID of dataset
+          required: true
+          type: string
+        - name: application
+          in: path
+          description: Slug of application (gfw,rw,prep)
+          required: true
+          type: string
+        - name: metadata
+          in: body
+          description: Metadata to save. Free object
+          required: true
+          schema:
+            $ref: '#/definitions/Metadata'
+      responses:
+        200:
+          description: The Metadata updated
+          schema:
+            $ref: '#/definitions/MetadataAPI'
         400:
           description: Validate error
           schema:
@@ -78,7 +222,6 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Errors'
-
 definitions:
   Errors:
     type: object
@@ -130,15 +273,15 @@ definitions:
         description: A meta object containing non-standard meta-information about the error.
 
 
-  GeoStoreAPI:
+  MetadataAPI:
     type: object
     properties:
       data:
         type: array
         items:
-          $ref: '#/definitions/GeoJSON'
+          $ref: '#/definitions/Metadata'
 
-  GeoJSON:
+  Metadata:
     type: object
     properties:
       type:
@@ -150,42 +293,16 @@ definitions:
       attributes:
         properties:
           schema:
-            $ref: '#/definitions/Features'
-  Features:
+            $ref: '#/definitions/MetadataBodyResponse'
+  MetadataBodyResponse:
     type: object
     properties:
-      type:
+      dataset:
         type: string
-        description: Type of feature
-      features:
-        type: array
-        description: Features
-        items:
-          $ref: '#/definitions/Feature'
-  Feature:
-    type: object
-    properties:
-      type:
+        description: Id of dataset
+      application:
         type: string
-        description: Type of feature
-      properties:
+        description: Slug of an application
+      info:
         type: object
-        description: Feature
-      geometry:
-        type: object
-        description: Geometries
-        properties:
-          schema:
-            $ref: '#/definitions/Geometry'
-
-  Geometry:
-    type: object
-    properties:
-      type:
-        type: string
-        description: Geometry type
-      coordinates:
-        type: array
-        description: Coordinates array
-        items:
-          type: object
+        description: Free object with the info of metadata
