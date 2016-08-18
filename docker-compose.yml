@@ -4,8 +4,6 @@ prod:
     - "5000"
   env_file:
     - prod.env
-  links:
-    - redis
   command: start
   restart: always
   log_driver: "gelf"

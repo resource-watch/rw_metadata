@@ -6,6 +6,7 @@ var config = require('config');
 var MetadataService = require('services/metadataService');
 var MetadataSerializer = require('serializers/metadataSerializer');
 const MetadataNotFound = require('errors/metadataNotFound');
+const MetadataDuplicated = require('errors/metadataDuplicated');
 const APPLICATIONS = require('appConstants').APPLICATIONS;
 
 var router = new Router({
@@ -27,8 +28,8 @@ class MetadataRouter {
             let metadata = yield MetadataService.create(this.params.dataset, this.params.application, this.request.body);
             this.body = MetadataSerializer.serialize(metadata);
         } catch(err) {
-            if(err instanceof MetadataNotFound){
-                this.throw(404, err.message);
+            if(err instanceof MetadataDuplicated){
+                this.throw(400, err.message);
                 return;
             }
             throw err;
