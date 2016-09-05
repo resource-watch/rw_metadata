@@ -14,6 +14,34 @@ produces:
   - application/vnd.api+json
 
 paths:
+  /metadata:
+    post:
+      description: Get metadatas of a datasets and application
+      operationId: findByIds
+      produces:
+        - application/vnd.api+json
+      tags:
+        - METADATA
+      parameters:
+        - name: metadata
+          in: body
+          description: Ids of datasets
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataFind'
+      responses:
+        200:
+          description: Metadatas obtained
+          schema:
+            $ref: '#/definitions/MetadataAPI'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
   /metadata/{dataset}:
     get:
       description: Returns metadatas filtered by dataset
@@ -272,6 +300,17 @@ definitions:
         type: object
         description: A meta object containing non-standard meta-information about the error.
 
+  MetadataFind:
+    type: object
+    properties:
+      ids:
+        type: array
+        description: ids of datasets
+        items:
+          type: string
+      app:
+        type: string
+        description: Name of the application (gfw, prep, etc)
 
   MetadataAPI:
     type: object

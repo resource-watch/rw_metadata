@@ -19,6 +19,20 @@ class MetadataService {
         return yield Metadata.find(filters).exec();
     }
 
+    static * findByIds(filter){
+        logger.info(`Obtaining metadata with filters ${filter}`);
+        let filters = {};
+        if(filter && filter.ids){
+            filters.dataset = {
+                $in: filter.ids
+            };
+        }
+        if(filter && filter.application){
+            filters.application = filter.application;
+        }
+        return yield Metadata.find(filters).exec();
+    }
+
     static * create(dataset, application, body){
         logger.info(`Creating metadata with dataset ${dataset} and application ${application}`);
         logger.debug('Checking if exist');
