@@ -17,6 +17,13 @@
             "path": "/api/v1/metadata/:dataset/:app"
         }]
     }, {
+        "url": "/metadata/find-by-ids",
+        "method": "POST",
+        "endpoints": [{
+            "method": "POST",
+            "path": "/api/v1/metadata/find-by-ids"
+        }]
+    }, {
         "url": "/metadata/:dataset/:app",
         "method": "POST",
         "endpoints": [{

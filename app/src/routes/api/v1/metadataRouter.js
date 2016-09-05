@@ -21,6 +21,14 @@ class MetadataRouter {
         this.body = MetadataSerializer.serialize(result);
     }
 
+    static * findByIds(){
+        logger.info(`Find metadata by ids with body ${this.request.body}`);
+        this.assert(this.request.body, 400, 'Filters required');
+        this.assert(this.request.body.ids, 400, 'Ids array field required');
+        let result = yield MetadataService.findByIds(this.request.body);
+        this.body = MetadataSerializer.serialize(result);
+    }
+
     static * create(){
         logger.info(`Creating metadata with params dataset ${this.params.dataset} and application ${this.params.application} and body ${this.request.body}`);
         this.assert(this.request.body, 400, 'Body required');
@@ -86,5 +94,6 @@ router.post('/:dataset/:application', validateApplication,  MetadataRouter.creat
 router.delete('/:dataset/:application', validateApplication, MetadataRouter.delete);
 router.delete('/:dataset', MetadataRouter.delete);
 router.patch('/:dataset/:application', validateApplication, MetadataRouter.update);
+router.post('/find-by-ids', MetadataRouter.findByIds);
 
 module.exports = router;
