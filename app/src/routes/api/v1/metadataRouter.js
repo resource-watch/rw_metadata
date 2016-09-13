@@ -65,6 +65,9 @@ class MetadataRouter {
         logger.info(`Updating metadata with params dataset ${this.params.dataset} and application ${this.params.application} and body ${this.request.body}`);
         this.assert(this.request.body, 400, 'Body required');
         try{
+            if(this.request.body.loggedUser){
+                delete this.request.body.loggedUser;
+            }
             let result = yield MetadataService.update(this.params.dataset, this.params.application, this.request.body);
             this.body = MetadataSerializer.serialize(result);
         } catch(err) {
