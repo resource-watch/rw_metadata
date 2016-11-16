@@ -14,6 +14,8 @@ var loader = require('loader');
 var mongoose = require('mongoose');
 var ErrorSerializer = require('serializers/errorSerializer');
 var mongoUri = process.env.MONGO_URI || 'mongodb://' + config.get('mongodb.host') + ':' + config.get('mongodb.port') + '/' + config.get('mongodb.database');
+const ctRegisterMicroservice = require('ct-register-microservice-node');
+
 
 var onDbReady = function(err) {
     if (err) {
@@ -60,20 +62,24 @@ var onDbReady = function(err) {
     // In production environment, the port must be declared in environment variable
     var port = process.env.PORT || config.get('service.port');
 
-    server.listen(port, function() {
-        var p = require('vizz.microservice-client').register({
-            id: config.get('service.id'),
-            name: config.get('service.name'),
-            dirConfig: path.join(__dirname, '../microservice'),
-            dirPackage: path.join(__dirname, '../../'),
-            logger: logger,
-            app: app
-        });
+    server.listen(port, () => {
 
-        p.then(function() {}, function(err) {
+        ctRegisterMicroservice.register({
+            info: require('../microservice/register.json'),
+            swagger: require('../microservice/swagger.json'),
+            mode: ctRegisterMicroservice.MODE_AUTOREGISTER,
+            framework: ctRegisterMicroservice.KOA1,
+            app,
+            logger,
+            name: config.get('service.name'),
+            ctUrl: process.env.CT_URL,
+            url: process.env.LOCAL_URL,
+            active: true,
+        }).then(() => {}, (err) => {
             logger.error(err);
             process.exit(1);
         });
+
     });
 
     logger.info('Server started in port:' + port);

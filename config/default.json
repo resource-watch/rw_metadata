@@ -6,14 +6,13 @@
         "dirLogFile": null
     },
     "service": {
-        "id": "rw-metadata_1.0.0",
         "name": "RW Metadata API",
-        "uri": "http://192.168.99.100:3100",
+        "uri": "http://mymachine:4000",
         "port": 4000
     },
     "mongodb":{
         "database": "rw_metadata_db",
-        "host": "192.168.99.100",
+        "host": "http://mymachine",
         "port": 27017
     }
 }

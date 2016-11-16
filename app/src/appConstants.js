@@ -1,5 +1,7 @@
-const APPLICATIONS = ['gfw', 'rw', 'prep'];
+const APPLICATIONS = ['gfw', 'gfw-climate', 'prep', 'rw', 'forest-atlas'];
+const RESOURCES = ['dataset', 'layer', 'embed'];
 
 module.exports = {
-    APPLICATIONS: APPLICATIONS
+    APPLICATIONS: APPLICATIONS,
+    RESOURCES: RESOURCES
 };

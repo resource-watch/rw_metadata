@@ -1,55 +1,46 @@
 {
-    "id": "#(service.id)",
     "name": "#(service.name)",
-    "tags": ["rw"],
-    "urls": [{
-        "url": "/metadata/:dataset",
+    "endpoints": [{
+        "path": "/metadata/:dataset",
         "method": "GET",
-        "endpoints": [{
+        "redirect": {
             "method": "GET",
-            "path": "/api/v1/metadata/:dataset"
-        }]
+            "path": "/metadata/:dataset"
+        }
     }, {
-        "url": "/metadata/:dataset/:app",
+        "path": "/metadata/:dataset/:app",
         "method": "GET",
-        "endpoints": [{
+        "redirect": {
             "method": "GET",
-            "path": "/api/v1/metadata/:dataset/:app"
-        }]
+            "path": "/metadata/:dataset/:app"
+        }
     }, {
-        "url": "/metadata/find-by-ids",
+        "path": "/metadata/find-by-ids",
         "method": "POST",
-        "endpoints": [{
+        "redirect": {
             "method": "POST",
-            "path": "/api/v1/metadata/find-by-ids"
-        }]
+            "path": "/metadata/find-by-ids"
+        }
     }, {
-        "url": "/metadata/:dataset/:app",
+        "path": "/metadata/:dataset/:app",
         "method": "POST",
-        "endpoints": [{
+        "redirect": {
             "method": "POST",
-            "path": "/api/v1/metadata/:dataset/:app"
-        }]
+            "path": "/metadata/:dataset/:app"
+        }
     }, {
-        "url": "/metadata/:dataset/:app",
+        "path": "/metadata/:dataset/:app",
         "method": "DELETE",
-        "endpoints": [{
+        "redirect": {
             "method": "DELETE",
-            "path": "/api/v1/metadata/:dataset/:app"
-        }]
+            "path": "/metadata/:dataset/:app"
+        }
     }, {
-        "url": "/metadata/:dataset",
-        "method": "DELETE",
-        "endpoints": [{
-            "method": "DELETE",
-            "path": "/api/v1/metadata/:dataset"
-        }]
-    }, {
-        "url": "/metadata/:dataset/:app",
+        "path": "/metadata/:dataset/:app",
         "method": "PATCH",
-        "endpoints": [{
+        "redirect": {
             "method": "PATCH",
-            "path": "/api/v1/metadata/:dataset/:app"
-        }]
+            "path": "/metadata/:dataset/:app"
+        }
     }]
 }
