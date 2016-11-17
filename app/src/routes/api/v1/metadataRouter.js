@@ -28,14 +28,17 @@ class MetadataRouter {
     static * get(){
         let resource = this.getResource();
         logger.info(`Getting metadata of ${resource.type}: ${resource.id}`);
-        let result = yield MetadataService.query(this.params.dataset, resource);
+        let result = yield MetadataService.get(this.params.dataset, resource);
         this.body = MetadataSerializer.serialize(result);
     }
 
     static * create(){
+        if(!this.request.body || this.request.body.app || this.request.body.language){
+            this.throw(400, 'Bad request');
+            return;
+        }
         let resource = this.getResource();
         logger.info(`Creating metadata of ${resource.type}: ${resource.id}`);
-        this.assert(this.request.body, 400, 'Body required');
         try{
             if(this.request.body.loggedUser){
                 delete this.request.body.loggedUser;
@@ -56,9 +59,12 @@ class MetadataRouter {
     }
 
     static * update(){
+        if(!this.request.body || this.request.body.app || this.request.body.language){ //@TODO this is patch condition (PUT?)
+            this.throw(400, 'Bad request');
+            return;
+        }
         let resource = this.getResource();
         logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
-        this.assert(this.request.body, 400, 'Body required');
         try{
             if(this.request.body.loggedUser){
                 delete this.request.body.loggedUser;

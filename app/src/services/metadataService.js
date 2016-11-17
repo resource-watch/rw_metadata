@@ -7,69 +7,73 @@ const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
 
 class MetadataService {
-    static * query(dataset, resource){
-        logger.info('Getting metadata'); //@TODO improve
-        let filters = {
-            dataset: dataset,
-            resource: resource
-        };
-        return yield Metadata.find(filters).exec();
-    }
-
-    static * create(dataset, resource, body){
-        logger.info('Creating metadata'); //@TODO: improve
-        logger.debug('Checking if exist');
-        let exists = yield Metadata.findOne({
+    
+    static * get(dataset, resource){
+        logger.debug('Getting metadata');
+        return yield Metadata.findOne({
             dataset: dataset,
             resource: resource
         }).exec();
-        logger.debug(exists);
-        if(exists){
-            logger.error('Metadata exists!!');
-            throw new MetadataDuplicated(`Metadata with dataset ${dataset} and application ${resource.id} exists`);
+    }
+
+    static * create(dataset, resource, body){
+        logger.debug('Checking if metadata exists');
+        let _metadata = yield Metadata.findOne({
+            dataset: dataset,
+            resource: resource
+        }).exec();
+        if(!_metadata){
+            logger.error('Error creating metadata');
+            throw new MetadataDuplicated(`Metadata of resource ${resource.type} : ${resource.id} already exists`);
         }
         logger.debug('Creating metadata');
         let metadata = new Metadata({
             dataset: dataset,
-            application: application,
-            info: body
+            resource: resource,
+            app: body.app,
+            language: body.language,
+            name: body.name,
+            description: body.description,
+            source: body.source,
+            citation: body.citation,
+            license: body.license,
+            info: body.info
         });
-        yield metadata.save();
-        return metadata;
+        return yield metadata.save().exec();
     }
 
-    static * update(dataset, application, body){
-        logger.info('Updating metadata'); //@TODO: improve
-        let exists = yield Metadata.findOne({
+    static * update(dataset, resource, body){ //@TODO PATCH or PUT (this is patch)
+        let metadata = yield Metadata.findOne({
             dataset: dataset,
-            application: application
+            resource: resource
         }).exec();
-        if(!exists){
-            logger.error('Metadata not exist!!');
-            throw new MetadataNotFound(`Metadata with dataset ${dataset} and application ${application} not found`);
+        if(!metadata){
+            logger.error('Error updating metadata');
+            throw new MetadataNotFound(`Metadata of resource ${resource.type} : ${resource.id} doesn't exist`);
         }
         logger.debug('Updating metadata');
-        exists.info = body;
-        yield exists.save();
-        return exists;
+        metadata.app = body.app; // @TODO: better
+        metadata.language = body.language;
+        metadata.name = body.name;
+        metadata.description = body.description;
+        metadata.source = body.source;
+        metadata.citation = body.citation;
+        metadata.license = body.license;
+        metadata.info = body.info;
+        return yield metadata.save().exec();
     }
 
-    static * delete(dataset, application){
-        logger.info('Deleting metadata'); //@TODO: improve
-        let filters = {};
-        if(dataset){
-            filters.dataset = dataset;
+    static * delete(dataset, resource){
+        let metadata = yield Metadata.findOne({
+            dataset: dataset,
+            resource: resource
+        }).exec();
+        if(!metadata){
+            logger.error('Error deleting metadata');
+            throw new MetadataNotFound(`Metadata of resource ${resource.type} : ${resource.id} doesn't exist`);
         }
-        if(application){
-            filters.application = application;
-        }
-        let metadatas = yield Metadata.find(filters).exec();
-        if(!metadatas || metadatas.length === 0){
-            return null;
-        }
-        logger.debug('Removing metadata');
-        yield Metadata.remove(filters).exec();
-        return metadatas;
+        logger.debug('Deleting metadata');
+        return yield metadata.remove().exec();
     }
 
     static * findByIds(filter){
