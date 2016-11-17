@@ -1,46 +1,88 @@
 {
     "name": "#(service.name)",
     "endpoints": [{
-        "path": "/metadata/:dataset",
+        "path": "/dataset/:dataset/metadata",
         "method": "GET",
         "redirect": {
             "method": "GET",
-            "path": "/metadata/:dataset"
+            "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/metadata/:dataset/:app",
-        "method": "GET",
-        "redirect": {
-            "method": "GET",
-            "path": "/metadata/:dataset/:app"
-        }
-    }, {
-        "path": "/metadata/find-by-ids",
+        "path": "/dataset/:dataset/metadata",
         "method": "POST",
         "redirect": {
             "method": "POST",
-            "path": "/metadata/find-by-ids"
+            "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/metadata/:dataset/:app",
-        "method": "POST",
-        "redirect": {
-            "method": "POST",
-            "path": "/metadata/:dataset/:app"
-        }
-    }, {
-        "path": "/metadata/:dataset/:app",
-        "method": "DELETE",
-        "redirect": {
-            "method": "DELETE",
-            "path": "/metadata/:dataset/:app"
-        }
-    }, {
-        "path": "/metadata/:dataset/:app",
+        "path": "/dataset/:dataset/metadata",
         "method": "PATCH",
         "redirect": {
             "method": "PATCH",
-            "path": "/metadata/:dataset/:app"
+            "path": "/api/v1/dataset/:dataset/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/metadata",
+        "method": "DELETE",
+        "redirect": {
+            "method": "DELETE",
+            "path": "/api/v1/dataset/:dataset/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "method": "POST",
+        "redirect": {
+            "method": "POST",
+            "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "method": "PATCH",
+        "redirect": {
+            "method": "PATCH",
+            "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "method": "DELETE",
+        "redirect": {
+            "method": "DELETE",
+            "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "method": "POST",
+        "redirect": {
+            "method": "POST",
+            "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "method": "PATCH",
+        "redirect": {
+            "method": "PATCH",
+            "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
+        }
+    }, {
+        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "method": "DELETE",
+        "redirect": {
+            "method": "DELETE",
+            "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
     }]
 }

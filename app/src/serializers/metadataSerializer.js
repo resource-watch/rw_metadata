@@ -28,7 +28,14 @@ class MetadataSerializer {
                     type: 'metadata',
                     attributes:{
                         dataset: el.dataset,
-                        application: el.application,
+                        app: el.app,
+                        resource: el.resource,
+                        lang: el.lang,
+                        name: el.name,
+                        description: el.description,
+                        source: el.source,
+                        citation: el.citation,
+                        license: el.license,
                         info: el.info
                     }
                 });
