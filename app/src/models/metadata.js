@@ -8,7 +8,7 @@ var Metadata = new Schema({
     dataset: {type: String, required: true, trim: true},
     app: {type: String, required: true, trim: true, enum: APPLICATIONS},
     resource: {
-        id: {type: String, required: false, trim: true},
+        id: {type: String, required: true, trim: true},
         type: {type: String, required: true, trim: true, enum: RESOURCES}
     },
     lang: {type: String, required: true, trim: true},
