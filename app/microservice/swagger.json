@@ -3,7 +3,7 @@
     "info": {
         "title": "RW Metadata API",
         "description": "Resource Watch - Metadata API",
-        "version": "1.0.0"
+        "version": "2.0.0"
     },
     "host": "example.vizzuality.com",
     "schemes": [

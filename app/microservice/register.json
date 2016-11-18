@@ -84,5 +84,33 @@
             "method": "DELETE",
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
+    }, {
+        "path": "/metadata",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/metadata"
+        }
+    }, {
+        "path": "/dataset/metadata/get-by-ids",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/dataset/metadata/get-by-ids/"
+        }
+    }, {
+        "path": "/dataset/:dataset/widget/metadata/get-by-ids",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/dataset/:dataset/widget/metadata/get-by-ids"
+        }
+    }, {
+        "path": "/dataset/:dataset/layer/metadata/get-by-ids",
+        "method": "GET",
+        "redirect": {
+            "method": "GET",
+            "path": "/api/v1/dataset/:dataset/layer/metadata/get-by-ids"
+        }
     }]
 }

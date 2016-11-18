@@ -25,6 +25,18 @@ class MetadataRouter {
         return resource;
     }
 
+    static getResourceTypeByPath(path){
+        let type = 'dataset';
+        if(path.indexOf('layer') > -1){
+            type = 'layer';
+        }
+        else if(path.indexOf('widget') > -1){
+            type = 'widget';
+        }
+        else{}
+        return type;
+    }
+
     static * get(){
         let resource = MetadataRouter.getResource(this.params);
         logger.info(`Getting metadata of ${resource.type}: ${resource.id}`);
@@ -98,48 +110,56 @@ class MetadataRouter {
         }
     }
 
-    static * findByIds(){
-        logger.info(`Find metadata by ids with body ${this.request.body}`);
-        this.assert(this.request.body, 400, 'Filters required');
-        this.assert(this.request.body.ids, 400, 'Ids array field required');
-        let result = yield MetadataService.findByIds(this.request.body);
+    static * getAll(){
+        logger.info('Getting all metadata');
+        let filter = {}; // @TODO: sorting
+        if(this.query.app){filter.app = this.query.app;}
+        if(this.query.lang){filter.lang = this.query.lang;}
+        if(this.query.limit){filter.limit = this.query.limit;}
+        let result = yield MetadataService.getAll(filter);
+        this.body = MetadataSerializer.serialize(result);
+    }
+
+    static * getByIds(){
+        if(!this.query.ids){
+            this.throw(400, 'Bad request');
+            return;
+        }
+        logger.info(`Getting metadata by ids: ${this.query.ids}`);
+        let resource = {
+            ids: this.query.ids.split(',')
+        };
+        resource.type = MetadataRouter.getResourceTypeByPath(this.path);
+        let filter = {};
+        if(this.query.app){filter.app = this.query.app;}
+        if(this.query.lang){filter.lang = this.query.lang;}
+        if(this.query.limit){filter.limit = this.query.limit;}
+        let result = yield MetadataService.getByIds(resource, filter);
         this.body = MetadataSerializer.serialize(result);
     }
 
 }
 
-// var validateApplication = function *(next){
-//     logger.debug('Apps', APPLICATIONS);
-//     if(this.params.application && APPLICATIONS.indexOf(this.params.application) > -1){
-//         yield next;
-//     } else {
-//         this.throw(400, `Application not found. Available applications ${APPLICATIONS.join(',')}`);
-//     }
-// };
-
+// dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/metadata', MetadataRouter.create);
 router.patch('/dataset/:dataset/metadata', MetadataRouter.update);
-//router.put('/dataset/:dataset/metadata', MetadataRouter.update); // @TODO
 router.delete('/dataset/:dataset/metadata', MetadataRouter.delete);
-
+// widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.create);
 router.patch('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.update);
-//router.put('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.update);
 router.delete('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.delete);
-
+// layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.create);
 router.patch('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.update);
-//router.put('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.update);
 router.delete('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.delete);
-
-// router.get('/:dataset/:application', MetadataRouter.query);
-// router.post('/:dataset/:application', validateApplication,  MetadataRouter.create);
-// router.delete('/:dataset/:application', validateApplication, MetadataRouter.delete);
-// router.patch('/:dataset/:application', validateApplication, MetadataRouter.update);
-
-router.post('/find-by-ids', MetadataRouter.findByIds);
+// generic
+router.get('/metadata', MetadataRouter.getAll);
+// get by id
+router.get('/dataset/metadata/get-by-ids', MetadataRouter.getByIds);
+router.get('/dataset/:dataset/widget/metadata/get-by-ids', MetadataRouter.getByIds);
+router.get('/dataset/:dataset/layer/metadata/get-by-ids', MetadataRouter.getByIds);
 
 module.exports = router;

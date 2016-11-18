@@ -1,6 +1,6 @@
 {
   "name": "rw-metadata",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Resource Watch - Metadata",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,9 @@
     "koa"
   ],
   "author": "rrequero",
+  "contributors": [
+      "sgordillo"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/resource-watch/rw_metadata/issues"

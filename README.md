@@ -1,4 +1,4 @@
-# Resource Watch Adapter CSV
+# Resource Watch Metadata Microservice
 
 
 This repository is the microservice that implements the csv adapter

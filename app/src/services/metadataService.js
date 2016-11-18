@@ -98,18 +98,23 @@ class MetadataService {
         return yield Metadata.remove(query).exec();
     }
 
-    static * findByIds(filter){
-        logger.info(`Obtaining metadata with filters ${filter}`);
-        let filters = {};
-        if(filter && filter.ids){
-            filters.dataset = {
-                $in: filter.ids
-            };
-        }
-        if(filter && filter.application){
-            filters.application = filter.application;
-        }
-        return yield Metadata.find(filters).exec();
+    static * getAll(_filter){
+        let filter = MetadataService.getFilter(_filter);
+        let limit = (isNaN(parseInt(_filter.limit))) ? 0:parseInt(_filter.limit);
+        logger.debug('Getting metadata');
+        return yield Metadata.find(filter).limit(limit).exec();
+    }
+
+    static * getByIds(resource, filter){
+        logger.info(`Getting metadata with ids ${resource.ids}`);
+        let _query = {
+            'resource.id': { $in: resource.ids },
+            'resource.type': resource.type
+        };
+        let query = Object.assign(_query, MetadataService.getFilter(filter));
+        let limit = (isNaN(parseInt(filter.limit))) ? 0:parseInt(filter.limit);
+        logger.debug('Getting metadata');
+        return yield Metadata.find(query).limit(limit).exec();
     }
 
 }
