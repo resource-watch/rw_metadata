@@ -48,6 +48,7 @@ class MetadataRouter {
     }
 
     static * create(){
+        logger.debug(this.request.body);
         if(!this.request.body || !this.request.body.app || !this.request.body.lang){
             this.throw(400, 'Bad request');
             return;
@@ -116,14 +117,17 @@ class MetadataRouter {
     }
 
     static * getByIds(){
-        if(!this.query.ids){
+        if(!this.request.body.ids){
             this.throw(400, 'Bad request');
             return;
         }
-        logger.info(`Getting metadata by ids: ${this.query.ids}`);
+        logger.info(`Getting metadata by ids: ${this.request.body.ids}`);
         let resource = {
-            ids: this.query.ids.split(',')
+            ids: this.request.body.ids
         };
+        if(typeof resource.ids === 'string'){
+            resource.ids = resource.ids.split(',').map(function(elem){return elem.trim();});
+        }
         resource.type = MetadataRouter.getResourceTypeByPath(this.path);
         let filter = {};
         if(this.query.app){filter.app = this.query.app;}
@@ -161,8 +165,8 @@ router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware
 // generic
 router.get('/metadata', MetadataRouter.getAll);
 // get by id
-router.get('/dataset/metadata/get-by-ids', MetadataRouter.getByIds);
-router.get('/dataset/:dataset/widget/metadata/get-by-ids', MetadataRouter.getByIds);
-router.get('/dataset/:dataset/layer/metadata/get-by-ids', MetadataRouter.getByIds);
+router.post('/dataset/metadata/get-by-ids', MetadataRouter.getByIds);
+router.post('/dataset/:dataset/widget/metadata/get-by-ids', MetadataRouter.getByIds);
+router.post('/dataset/:dataset/layer/metadata/get-by-ids', MetadataRouter.getByIds);
 
 module.exports = router;

@@ -24,7 +24,7 @@ class MetadataSerializer {
             }
             data.forEach(function(el){
                 result.data.push({
-                    id: el._id,
+                    id: el.resource.id,
                     type: 'metadata',
                     attributes:{
                         dataset: el.dataset,
