@@ -98,8 +98,11 @@ class MetadataService {
         return yield Metadata.remove(query).exec();
     }
 
-    static * getAll(_filter){
+    static * getAll(_filter, extendedFilter){
         let filter = MetadataService.getFilter(_filter);
+        if(extendedFilter && extendedFilter.type){
+            filter['resource.type'] = extendedFilter.type;
+        }
         let limit = (isNaN(parseInt(_filter.limit))) ? 0:parseInt(_filter.limit);
         logger.debug('Getting metadata');
         return yield Metadata.find(filter).limit(limit).exec();

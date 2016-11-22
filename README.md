@@ -79,6 +79,11 @@ lang: select between available languages (select one or some of them)
 limit: desired number
 ```
 
+Custom param for /metadata endpoint
+```
+type: [dataset, widget, layer]
+```
+
 ### CRUD Examples
 
 #### Getting

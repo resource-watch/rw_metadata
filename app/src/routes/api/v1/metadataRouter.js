@@ -7,7 +7,6 @@ var MetadataService = require('services/metadataService');
 var MetadataSerializer = require('serializers/metadataSerializer');
 const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
-const APPLICATIONS = require('appConstants').APPLICATIONS;
 
 var router = new Router();
 
@@ -56,9 +55,6 @@ class MetadataRouter {
         let resource = MetadataRouter.getResource(this.params);
         logger.info(`Creating metadata of ${resource.type}: ${resource.id}`);
         try{
-            if(this.request.body.loggedUser){
-                delete this.request.body.loggedUser;
-            }
             let result = yield MetadataService.create(this.params.dataset, resource, this.request.body);
             this.body = MetadataSerializer.serialize(result);
         } catch(err) {
@@ -78,9 +74,6 @@ class MetadataRouter {
         let resource = MetadataRouter.getResource(this.params);
         logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
         try{
-            if(this.request.body.loggedUser){
-                delete this.request.body.loggedUser;
-            }
             let result = yield MetadataService.update(this.params.dataset, resource, this.request.body);
             this.body = MetadataSerializer.serialize(result);
         } catch(err) {
@@ -112,11 +105,13 @@ class MetadataRouter {
 
     static * getAll(){
         logger.info('Getting all metadata');
-        let filter = {}; // @TODO: sorting
+        let filter = {};
+        let extendedFilter = {};
         if(this.query.app){filter.app = this.query.app;}
         if(this.query.lang){filter.lang = this.query.lang;}
         if(this.query.limit){filter.limit = this.query.limit;}
-        let result = yield MetadataService.getAll(filter);
+        if(this.query.type){extendedFilter.type = this.query.type;}
+        let result = yield MetadataService.getAll(filter, extendedFilter);
         this.body = MetadataSerializer.serialize(result);
     }
 
@@ -140,21 +135,29 @@ class MetadataRouter {
 
 }
 
+const authorizationMiddleware = function*(next) {
+    // if(!this.request.body.loggedUser){
+    //     this.throw(401, 'Unauthorized');
+    //     return;
+    // }
+    yield next;
+};
+
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/metadata', MetadataRouter.create);
-router.patch('/dataset/:dataset/metadata', MetadataRouter.update);
-router.delete('/dataset/:dataset/metadata', MetadataRouter.delete);
+router.post('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
 // widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.create);
-router.patch('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.update);
-router.delete('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.delete);
+router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
 // layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.create);
-router.patch('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.update);
-router.delete('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.delete);
+router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
 // generic
 router.get('/metadata', MetadataRouter.getAll);
 // get by id
