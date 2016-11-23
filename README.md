@@ -62,9 +62,9 @@ GET: /metadata
 ### FindByIds Metadata
 
 ```
-POST: /dataset/metadata/find-by-ids,
-POST: /dataset/:dataset/widget/metadata/find-by-ids,
-POST: /dataset/:dataset/layer/metadata/find-by-ids,
+POST: /dataset/metadata/find-by-ids
+POST: /dataset/:dataset/widget/metadata/find-by-ids
+POST: /dataset/:dataset/layer/metadata/find-by-ids
 ```
 
 ### POST, PATCH, DELETE
