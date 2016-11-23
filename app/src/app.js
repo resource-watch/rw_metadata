@@ -67,7 +67,7 @@ var onDbReady = function(err) {
         ctRegisterMicroservice.register({
             info: require('../microservice/register.json'),
             swagger: require('../microservice/swagger.json'),
-            mode: ctRegisterMicroservice.MODE_AUTOREGISTER,
+            mode: process.env.NODE_ENV === 'dev' ? ctRegisterMicroservice.MODE_AUTOREGISTER : ctRegisterMicroservice.MODE_NORMAL,
             framework: ctRegisterMicroservice.KOA1,
             app,
             logger,
