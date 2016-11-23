@@ -4,7 +4,7 @@ This repository implements the metadata services that are available in the Resou
 
 If you are looking for the API Doc (Info and Usage) please go to the next link:
 [View the documentation for this
-API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/resource-watch/rw_metadata/master/app/microservice/swagger.yml#/)
+API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/resource-watch/rw_metadata/master/application/microservice/swagger.yml#/)
 
 ## Quick Overview
 
@@ -12,12 +12,12 @@ API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/
 
 ```
 dataset: <String>, required
-app: <String>, required, [gfw, gfw-climate, prep, rw, forest-atlas]
+application: <String>, required
 resource: {
     id: <String>, required
     type: <String>, required, [dataset, widget, layer]
 },
-lang: <String>, required
+language: <String>, required
 name: <String>
 description: <String>
 source: <String>
@@ -69,14 +69,14 @@ POST: /dataset/:dataset/layer/metadata/find-by-ids,
 
 ### POST, PATCH, DELETE
 
-"app" and "lang" attributes are required and it is mandatory to include them in the payload (when doing CRUD requests).
+"application" and "language" attributes are required and it is mandatory to include them in the payload (when doing CRUD requests).
 **This doesn't apply to the FindByIds Endpoints**
 
 ### GET Queryparam Filters:
 
 ```
-app: gfw, gfw-climate, prep, rw, forest-atlas (select one or some of them)
-lang: select between available languages (select one or some of them)
+application: gfw, gfw-climate, prep, rw, forest-atlas (select one or some of them)
+language: select between available languages (select one or some of them)
 limit: desired number
 ```
 
@@ -93,45 +93,45 @@ type: [dataset, widget, layer]
 GET: /dataset/111123/metadata
 GET: /dataset/111123/widget/134599/metadata
 GET: /dataset/111123/layer/134599/metadata
-GET: /dataset/111123/metadata?app=rw&lang=es,en&limit=20
-GET: /dataset/111123/widget/134599/metadata?app=rw,gfw&lang=en
-GET: /dataset/111123/layer/134599/metadata?lang=en
+GET: /dataset/111123/metadata?application=rw&language=es,en&limit=20
+GET: /dataset/111123/widget/134599/metadata?application=rw,gfw&language=en
+GET: /dataset/111123/layer/134599/metadata?language=en
 ```
 
 #### Creating
 
 ```
-POST: /dataset/111123/metadata -> payload: {"app": "rw", "lang": "es"}
-POST: /dataset/111123/widget/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-POST: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-POST: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es", "name": "M1", "info": {"a": "a", "b": "b"}}
+POST: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es"}
+POST: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es"}
+POST: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es"}
+POST: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M1", "info": {"a": "a", "b": "b"}}
 ```
 
 #### Updating (partial)
 
 ```
-PATCH: /dataset/111123/metadata -> payload: {"app": "rw", "lang": "es"}
-PATCH: /dataset/111123/widget/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-PATCH: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-PATCH: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
+PATCH: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es"}
+PATCH: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es"}
+PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es"}
+PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
 ```
 
 #### Deleting
 
 ```
-DELETE: /dataset/111123/metadata -> payload: {"app": "rw", "lang": "es"}
-DELETE: /dataset/111123/widget/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-DELETE: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es"}
-DELETE: /dataset/111123/layer/134599/metadata -> payload: {"app": "rw", "lang": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
+DELETE: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es"}
+DELETE: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es"}
+DELETE: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es"}
+DELETE: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
 ```
 
 #### Getting All
 
 ```
 GET: /metadata
-GET: /metadata?app=rw&lang=es,en&limit=20
-GET: /metadata?app=rw,gfw&lang=en
-GET: /metadata?lang=en
+GET: /metadata?application=rw&language=es,en&limit=20
+GET: /metadata?application=rw,gfw&language=en
+GET: /metadata?language=en
 ```
 
 #### Finding By Ids
@@ -143,9 +143,9 @@ payload -> {"ids": "112313, 111123"}
 
 ```
 POST: /dataset/metadata/find-by-ids -> payload: {"ids": ["112313", "111123"]}
-POST: /dataset/metadata/find-by-ids?app=rw&lang=es,en&limit=20 -> payload: {"ids": "112313, 111123"}
+POST: /dataset/metadata/find-by-ids?application=rw&language=es,en&limit=20 -> payload: {"ids": "112313, 111123"}
 POST: /dataset/111123/widget/metadata/find-by-ids, -> payload: {"ids": "112313, 111123"}
-POST: /dataset/111123/widget/metadata/find-by-ids?app=rw,gfw&lang=es&limit=200 -> payload: {"ids": ["112313", "111123"]}
+POST: /dataset/111123/widget/metadata/find-by-ids?application=rw,gfw&language=es&limit=200 -> payload: {"ids": ["112313", "111123"]}
 ```
 
 Ir order to contribute to this repo:

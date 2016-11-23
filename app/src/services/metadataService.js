@@ -10,11 +10,11 @@ class MetadataService {
 
     static getFilter(_filter){
         var filter = {};
-        if(_filter && _filter.app){
-            filter.app = { $in: _filter.app.split(',') };
+        if(_filter && _filter.application){
+            filter.application = { $in: _filter.application.split(',') };
         }
-        if(_filter && _filter.lang){
-            filter.lang = { $in: _filter.lang.split(',') };
+        if(_filter && _filter.language){
+            filter.language = { $in: _filter.language.split(',') };
         }
         return filter;
     }
@@ -31,25 +31,26 @@ class MetadataService {
         return yield Metadata.find(query).limit(limit).exec();
     }
 
-    static * create(dataset, resource, body){
+    static * create(user, dataset, resource, body){
         logger.debug('Checking if metadata exists');
         let _metadata = yield Metadata.findOne({
             dataset: dataset,
             'resource.id': resource.id,
             'resource.type': resource.type,
-            app: body.app,
-            lang: body.lang
+            application: body.application,
+            language: body.language
         }).exec();
         if(_metadata){
             logger.error('Error creating metadata');
-            throw new MetadataDuplicated(`Metadata of resource ${resource.type}: ${resource.id}, app: ${body.app} and lang: ${body.lang} already exists`);
+            throw new MetadataDuplicated(`Metadata of resource ${resource.type}: ${resource.id}, application: ${body.application} and language: ${body.language} already exists`);
         }
         logger.debug('Creating metadata');
         let metadata = new Metadata({
             dataset: dataset,
             resource: resource,
-            app: body.app,
-            lang: body.lang,
+            application: body.application,
+            language: body.language,
+            userId: user.id,
             name: body.name,
             description: body.description,
             source: body.source,
@@ -65,8 +66,8 @@ class MetadataService {
             dataset: dataset,
             'resource.id': resource.id,
             'resource.type': resource.type,
-            app: body.app,
-            lang: body.lang
+            application: body.application,
+            language: body.language
         }).exec();
         if(!metadata){
             logger.error('Error updating metadata');
@@ -118,6 +119,26 @@ class MetadataService {
         let limit = (isNaN(parseInt(filter.limit))) ? 0:parseInt(filter.limit);
         logger.debug('Getting metadata');
         return yield Metadata.find(query).limit(limit).exec();
+    }
+
+    /*
+    * @returns: hasPermission: <Boolean>
+    */
+    static * hasPermission(user, dataset, resource, body){
+        let permission = true;
+        let metadata = yield Metadata.findOne({
+            dataset: dataset,
+            'resource.id': resource.id,
+            'resource.type': resource.type,
+            application: body.application,
+            language: body.language
+        }).exec();
+        if(metadata){
+            if(metadata.userId !== user.id){
+                permission = false;
+            }
+        }
+        return permission;
     }
 
 }

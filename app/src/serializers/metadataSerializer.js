@@ -3,10 +3,9 @@
 var logger = require('logger');
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 var metadataSerializer = new JSONAPISerializer('metadata', {
-    attributes: ['info', 'application', 'dataset'],
-    info:{
-        pluralizeType: false
-    },
+    attributes: ['dataset', 'application', 'resource',
+        'language', 'name', 'description', 'source', 'citation',
+        'license', 'info'],
     pluralizeType: false,
     keyForAttribute: 'camelCase'
 });
@@ -28,9 +27,9 @@ class MetadataSerializer {
                     type: 'metadata',
                     attributes:{
                         dataset: el.dataset,
-                        app: el.app,
+                        application: el.application,
                         resource: el.resource,
-                        lang: el.lang,
+                        language: el.language,
                         name: el.name,
                         description: el.description,
                         source: el.source,

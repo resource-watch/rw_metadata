@@ -10,6 +10,7 @@
     }, {
         "path": "/dataset/:dataset/metadata",
         "method": "POST",
+        "authenticated": true,
         "redirect": {
             "method": "POST",
             "path": "/api/v1/dataset/:dataset/metadata"
@@ -17,6 +18,7 @@
     }, {
         "path": "/dataset/:dataset/metadata",
         "method": "PATCH",
+        "authenticated": true,
         "redirect": {
             "method": "PATCH",
             "path": "/api/v1/dataset/:dataset/metadata"
@@ -24,6 +26,7 @@
     }, {
         "path": "/dataset/:dataset/metadata",
         "method": "DELETE",
+        "authenticated": true,
         "redirect": {
             "method": "DELETE",
             "path": "/api/v1/dataset/:dataset/metadata"
@@ -38,6 +41,7 @@
     }, {
         "path": "/dataset/:dataset/widget/:widget/metadata",
         "method": "POST",
+        "authenticated": true,
         "redirect": {
             "method": "POST",
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
@@ -45,6 +49,7 @@
     }, {
         "path": "/dataset/:dataset/widget/:widget/metadata",
         "method": "PATCH",
+        "authenticated": true,
         "redirect": {
             "method": "PATCH",
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
@@ -52,6 +57,7 @@
     }, {
         "path": "/dataset/:dataset/widget/:widget/metadata",
         "method": "DELETE",
+        "authenticated": true,
         "redirect": {
             "method": "DELETE",
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
@@ -66,6 +72,7 @@
     }, {
         "path": "/dataset/:dataset/layer/:layer/metadata",
         "method": "POST",
+        "authenticated": true,
         "redirect": {
             "method": "POST",
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
@@ -73,6 +80,7 @@
     }, {
         "path": "/dataset/:dataset/layer/:layer/metadata",
         "method": "PATCH",
+        "authenticated": true,
         "redirect": {
             "method": "PATCH",
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
@@ -80,6 +88,7 @@
     }, {
         "path": "/dataset/:dataset/layer/:layer/metadata",
         "method": "DELETE",
+        "authenticated": true,
         "redirect": {
             "method": "DELETE",
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"

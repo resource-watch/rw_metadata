@@ -1,7 +1,7 @@
-const APPLICATIONS = ['gfw', 'gfw-climate', 'prep', 'rw', 'forest-atlas'];
 const RESOURCES = ['dataset', 'layer', 'widget'];
+const USER_ROLES = ['USER', 'MANAGER', 'ADMIN', 'SUPERADMIN'];
 
 module.exports = {
-    APPLICATIONS: APPLICATIONS,
-    RESOURCES: RESOURCES
+    RESOURCES: RESOURCES,
+    USER_ROLES: USER_ROLES
 };
