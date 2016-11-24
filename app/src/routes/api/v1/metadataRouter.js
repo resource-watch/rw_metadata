@@ -49,7 +49,6 @@ class MetadataRouter {
     }
 
     static * create(){
-        logger.debug(this.request.body);
         if(!this.request.body || !this.request.body.application || !this.request.body.language){
             this.throw(400, 'Bad request');
             return;

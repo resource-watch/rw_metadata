@@ -110,7 +110,7 @@ class MetadataService {
     }
 
     static * getByIds(resource, filter){
-        logger.info(`Getting metadata with ids ${resource.ids}`);
+        logger.debug(`Getting metadata with ids ${resource.ids}`);
         let _query = {
             'resource.id': { $in: resource.ids },
             'resource.type': resource.type
@@ -134,7 +134,7 @@ class MetadataService {
             language: body.language
         }).exec();
         if(metadata){
-            if(metadata.userId !== user.id){
+            if(metadata.userId !== 'legacy' && metadata.userId !== user.id){
                 permission = false;
             }
         }

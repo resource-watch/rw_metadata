@@ -110,27 +110,28 @@ POST: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "l
 #### Updating (partial)
 
 ```
-PATCH: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es"}
-PATCH: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es"}
-PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es"}
-PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
+PATCH: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es", "name": "M0", "info": {"a": "A", "b": "B"}}
+PATCH: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M1", "info": {"c": "C", "d": "D"}}
+PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M2", "info": {"e": "E", "f": "F"}}
+PATCH: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M3", "info": {"g": "G", "h": "H"}}
 ```
 
 #### Deleting
 
 ```
-DELETE: /dataset/111123/metadata -> payload: {"application": "rw", "language": "es"}
-DELETE: /dataset/111123/widget/134599/metadata -> payload: {"application": "rw", "language": "es"}
-DELETE: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es"}
-DELETE: /dataset/111123/layer/134599/metadata -> payload: {"application": "rw", "language": "es", "name": "M2", "info": {"a": "A", "b": "B"}}
+DELETE: /dataset/111123/metadata?application=rw&language=en
+DELETE: /dataset/111123/widget/134599/metadata?application=rw&language=es
+DELETE: /dataset/111123/layer/134599/metadata?application=gfw&language=en
 ```
 
 #### Getting All
 
 ```
 GET: /metadata
+GET: /metadata?type=dataset
+GET: /metadata?type=widget
 GET: /metadata?application=rw&language=es,en&limit=20
-GET: /metadata?application=rw,gfw&language=en
+GET: /metadata?application=rw,gfw&language=en&type=dataset
 GET: /metadata?language=en
 ```
 
