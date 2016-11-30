@@ -168,22 +168,14 @@ const validationMiddleware = function*(next){
         this.throw(400, 'Bad request');
         return;
     }
-    if(this.request.method === 'POST'){
-        try{
-            yield MetadataValidator.validateCreation(this);
-        } catch(err) {
-            if(err instanceof MetadataNotValid){
-                this.throw(400, err.getMessages());
-                return;
-            }
-            throw err;
+    try{
+        yield MetadataValidator.validate(this);
+    } catch(err) {
+        if(err instanceof MetadataNotValid){
+            this.throw(400, err.getMessages());
+            return;
         }
-    }
-    else if (this.request.method === 'PATCH') {
-        MetadataValidator.validateUpdate(this);
-    }
-    else{
-        //foo
+        throw err;
     }
     yield next;
 };
@@ -191,17 +183,17 @@ const validationMiddleware = function*(next){
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.update);
+router.patch('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
 // widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware,  MetadataRouter.update);
+router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
 // layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.update);
+router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
 // generic
 router.get('/metadata', MetadataRouter.getAll);
