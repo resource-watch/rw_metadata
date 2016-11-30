@@ -35,7 +35,10 @@ class MetadataSerializer {
                         source: el.source,
                         citation: el.citation,
                         license: el.license,
-                        info: el.info
+                        info: el.info,
+                        createdAt: el.createdAt,
+                        updatedAt: el.updatedAt,
+                        status: el.status
                     }
                 });
             });

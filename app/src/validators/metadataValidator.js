@@ -15,7 +15,12 @@ class MetadataValidator{
         koaObj.checkBody('source').optional().isAscii();
         koaObj.checkBody('citation').optional().isAscii();
         koaObj.checkBody('license').optional().isAscii();
-        koaObj.checkBody('info').optional();
+        koaObj.checkBody('info').optional().check(function(){
+            if(this.info instanceof Object && this.info.length === undefined){
+                return true;
+            }
+            return false;
+        }.bind(koaObj.request.body));
         if(koaObj.errors){
             logger.error('Error validating metadata creation');
             throw new MetadataNotValid(koaObj.errors);

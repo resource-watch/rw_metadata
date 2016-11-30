@@ -80,6 +80,7 @@ class MetadataService {
         metadata.citation = body.citation ? body.citation:metadata.citation;
         metadata.license = body.license ? body.license:metadata.license;
         metadata.info = body.info ? body.info:metadata.info;
+        metadata.updatedAt = new Date();
         return metadata.save();
     }
 

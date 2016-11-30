@@ -24,6 +24,9 @@ source: <String>
 citation: <String>
 license: <String>
 info: <Object>
+createdAt: <Date>
+updatedAt: <Date>
+status: <String>, [published, unpublished]
 ```
 
 ### Dataset Metadata
