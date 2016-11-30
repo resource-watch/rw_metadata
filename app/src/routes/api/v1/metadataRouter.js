@@ -136,17 +136,25 @@ class MetadataRouter {
 
 // Negative checking
 const authorizationMiddleware = function*(next) {
-    if(!this.request.body.loggedUser || USER_ROLES.indexOf(this.request.body.loggedUser.role) === -1){
+    // Check delete
+    if(this.request.method === 'DELETE' && (!this.request.query.language || !this.request.query.application)){
+        this.throw(400, 'Bad request');
+        return;
+    }
+    // Get user from query (delete) or body (post-patch)
+    let user = Object.assign({}, this.request.query.loggedUser? JSON.parse(this.request.query.loggedUser): {}, this.request.body.loggedUser);
+    if(!user || USER_ROLES.indexOf(user.role) === -1){
         this.throw(401, 'Unauthorized'); //if not logged or invalid ROLE-> out
         return;
     }
-    let user = this.request.body.loggedUser;
     if(user.role === 'USER'){
         this.throw(403, 'Forbidden'); // if USER -> out
         return;
     }
+    // Get application from query (delete) or body (post-patch)
+    let application = this.request.query.application? this.request.query.application: this.request.body.application;
     if(user.role === 'MANAGER' || user.role === 'ADMIN'){
-        if(user.extraUserData.apps.indexOf(this.request.body.application) === -1){
+        if(user.extraUserData.apps.indexOf(application) === -1){
             this.throw(403, 'Forbidden'); // if manager or admin but no application -> out
             return;
         }

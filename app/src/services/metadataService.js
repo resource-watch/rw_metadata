@@ -97,7 +97,8 @@ class MetadataService {
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
         }
         logger.debug('Deleting metadata');
-        return yield Metadata.remove(query).exec();
+        yield Metadata.remove(query).exec();
+        return metadata;
     }
 
     static * getAll(_filter, extendedFilter){
