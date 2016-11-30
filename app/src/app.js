@@ -10,6 +10,7 @@ var koa = require('koa');
 var compress = require('koa-compress');
 var bodyParser = require('koa-bodyparser');
 var koaLogger = require('koa-logger');
+var koaValidate = require('koa-validate');
 var loader = require('loader');
 var mongoose = require('mongoose');
 var ErrorSerializer = require('serializers/errorSerializer');
@@ -51,6 +52,8 @@ var onDbReady = function(err) {
         this.response.type = 'application/vnd.api+json';
     });
 
+    //koa validate
+    koaValidate(app);
 
     //load routes
     loader.loadRoutes(app);
@@ -66,7 +69,7 @@ var onDbReady = function(err) {
 
         ctRegisterMicroservice.register({
             info: require('../microservice/register.json'),
-            swagger: require('../microservice/swagger.json'),
+            swagger: require('../microservice/public-swagger.json'),
             mode: process.env.NODE_ENV === 'dev' ? ctRegisterMicroservice.MODE_AUTOREGISTER : ctRegisterMicroservice.MODE_NORMAL,
             framework: ctRegisterMicroservice.KOA1,
             app,

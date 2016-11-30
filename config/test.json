@@ -1,7 +1,7 @@
 {
     "logger": {
         "name": "rw-metadata-TEST",
-        "level": "info",
+        "level": "debug",
         "toFile": false,
         "dirLogFile": null
     }

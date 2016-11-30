@@ -4,7 +4,5 @@
         "level": "warn",
         "toFile": false,
         "dirLogFile": null
-    },
-    "service": {
     }
 }

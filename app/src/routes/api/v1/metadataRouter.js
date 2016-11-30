@@ -5,8 +5,10 @@ var logger = require('logger');
 var config = require('config');
 var MetadataService = require('services/metadataService');
 var MetadataSerializer = require('serializers/metadataSerializer');
+var MetadataValidator = require('validators/MetadataValidator');
 const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
+const MetadataNotValid = require('errors/metadataNotValid');
 const USER_ROLES = require('appConstants').USER_ROLES;
 
 var router = new Router();
@@ -49,10 +51,6 @@ class MetadataRouter {
     }
 
     static * create(){
-        if(!this.request.body || !this.request.body.application || !this.request.body.language){
-            this.throw(400, 'Bad request');
-            return;
-        }
         let resource = MetadataRouter.getResource(this.params);
         logger.info(`Creating metadata of ${resource.type}: ${resource.id}`);
         try{
@@ -69,10 +67,6 @@ class MetadataRouter {
     }
 
     static * update(){
-        if(!this.request.body || !this.request.body.application || !this.request.body.language){
-            this.throw(400, 'Bad request');
-            return;
-        }
         let resource = MetadataRouter.getResource(this.params);
         logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
         try{
@@ -168,19 +162,45 @@ const authorizationMiddleware = function*(next) {
     yield next; // SUPERADMIN is included here
 };
 
+// Validator Wrapper
+const validationMiddleware = function*(next){
+    if(!this.request.body || !this.request.body.application || !this.request.body.language){
+        this.throw(400, 'Bad request');
+        return;
+    }
+    if(this.request.method === 'POST'){
+        try{
+            yield MetadataValidator.validateCreation(this);
+        } catch(err) {
+            if(err instanceof MetadataNotValid){
+                this.throw(400, err.getMessages());
+                return;
+            }
+            throw err;
+        }
+    }
+    else if (this.request.method === 'PATCH') {
+        MetadataValidator.validateUpdate(this);
+    }
+    else{
+        //foo
+    }
+    yield next;
+};
+
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.create);
+router.post('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
 router.patch('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
 // widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.update);
+router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware,  MetadataRouter.update);
 router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
 // layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.create);
+router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
 router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
 // generic
