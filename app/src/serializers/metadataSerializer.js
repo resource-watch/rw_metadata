@@ -23,7 +23,7 @@ class MetadataSerializer {
             }
             data.forEach(function(el){
                 result.data.push({
-                    id: el.resource.id,
+                    id: el.dataset + '-' + el.resource.type + '-' + el.resource.id + '-' + el.application + '-' + el.language,
                     type: 'metadata',
                     attributes:{
                         dataset: el.dataset,
