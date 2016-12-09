@@ -1,6 +1,6 @@
 # Resource Watch Metadata Microservice
 
-This repository implements the metadata services that are available in the Resource Watch API.
+This repository implements the metadata services that are available in the Resource Watch API. 
 
 If you are looking for the API Doc (Info and Usage) please go to the next link:
 [View the documentation for this
