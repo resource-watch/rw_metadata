@@ -1,11 +1,8 @@
 {
     "logger": {
         "name": "rw-metadata-STAGING",
-        "level": "debug",
+        "level": "info",
         "toFile": false,
         "dirLogFile": null
-    },
-    "service": {
-        "port": null
     }
 }

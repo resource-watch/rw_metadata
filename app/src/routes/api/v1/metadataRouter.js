@@ -5,39 +5,58 @@ var logger = require('logger');
 var config = require('config');
 var MetadataService = require('services/metadataService');
 var MetadataSerializer = require('serializers/metadataSerializer');
+var MetadataValidator = require('validators/metadataValidator');
 const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
-const APPLICATIONS = require('appConstants').APPLICATIONS;
+const MetadataNotValid = require('errors/metadataNotValid');
+const USER_ROLES = require('appConstants').USER_ROLES;
 
-var router = new Router({
-    prefix: '/metadata'
-});
-
+var router = new Router();
 
 class MetadataRouter {
-    static * query(){
-        logger.info(`Obtaining metadata with params dataset ${this.params.dataset} and application ${this.params.application}`);
-        let result = yield MetadataService.query(this.params.dataset, this.params.application);
-        this.body = MetadataSerializer.serialize(result);
+
+    static getResource(params){
+        let resource = {id: params.dataset, type: 'dataset'};
+        if(params.layer){
+            resource = {id: params.layer, type: 'layer'};
+        }
+        else if(params.widget){
+            resource = {id: params.widget, type: 'widget'};
+        }
+        else{}
+        return resource;
     }
 
-    static * findByIds(){
-        logger.info(`Find metadata by ids with body ${this.request.body}`);
-        this.assert(this.request.body, 400, 'Filters required');
-        this.assert(this.request.body.ids, 400, 'Ids array field required');
-        let result = yield MetadataService.findByIds(this.request.body);
+    static getResourceTypeByPath(path){
+        let type = 'dataset';
+        if(path.indexOf('layer') > -1){
+            type = 'layer';
+        }
+        else if(path.indexOf('widget') > -1){
+            type = 'widget';
+        }
+        else{}
+        return type;
+    }
+
+    static * get(){
+        let resource = MetadataRouter.getResource(this.params);
+        logger.info(`Getting metadata of ${resource.type}: ${resource.id}`);
+        let filter = {};
+        if(this.query.application){filter.application = this.query.application;}
+        if(this.query.language){filter.language = this.query.language;}
+        if(this.query.limit){filter.limit = this.query.limit;}
+        let result = yield MetadataService.get(this.params.dataset, resource, filter);
         this.body = MetadataSerializer.serialize(result);
     }
 
     static * create(){
-        logger.info(`Creating metadata with params dataset ${this.params.dataset} and application ${this.params.application} and body ${this.request.body}`);
-        this.assert(this.request.body, 400, 'Body required');
+        let resource = MetadataRouter.getResource(this.params);
+        logger.info(`Creating metadata of ${resource.type}: ${resource.id}`);
         try{
-            if(this.request.body.loggedUser){
-                delete this.request.body.loggedUser;
-            }
-            let metadata = yield MetadataService.create(this.params.dataset, this.params.application, this.request.body);
-            this.body = MetadataSerializer.serialize(metadata);
+            let user = this.request.body.loggedUser;
+            let result = yield MetadataService.create(user, this.params.dataset, resource, this.request.body);
+            this.body = MetadataSerializer.serialize(result);
         } catch(err) {
             if(err instanceof MetadataDuplicated){
                 this.throw(400, err.message);
@@ -47,10 +66,11 @@ class MetadataRouter {
         }
     }
 
-    static * delete(){
-        logger.info(`Deleting metadata with params dataset ${this.params.dataset} and application ${this.params.application}`);
+    static * update(){
+        let resource = MetadataRouter.getResource(this.params);
+        logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
         try{
-            let result = yield MetadataService.delete(this.params.dataset, this.params.application);
+            let result = yield MetadataService.update(this.params.dataset, resource, this.request.body);
             this.body = MetadataSerializer.serialize(result);
         } catch(err) {
             if(err instanceof MetadataNotFound){
@@ -61,14 +81,14 @@ class MetadataRouter {
         }
     }
 
-    static * update(){
-        logger.info(`Updating metadata with params dataset ${this.params.dataset} and application ${this.params.application} and body ${this.request.body}`);
-        this.assert(this.request.body, 400, 'Body required');
+    static * delete(){
+        let resource = MetadataRouter.getResource(this.params);
+        logger.info(`Deleting metadata of ${resource.type}: ${resource.id}`);
+        let filter = {};
+        if(this.query.application){filter.application = this.query.application;}
+        if(this.query.language){filter.language = this.query.language;}
         try{
-            if(this.request.body.loggedUser){
-                delete this.request.body.loggedUser;
-            }
-            let result = yield MetadataService.update(this.params.dataset, this.params.application, this.request.body);
+            let result = yield MetadataService.delete(this.params.dataset, resource, filter);
             this.body = MetadataSerializer.serialize(result);
         } catch(err) {
             if(err instanceof MetadataNotFound){
@@ -77,26 +97,117 @@ class MetadataRouter {
             }
             throw err;
         }
+    }
+
+    static * getAll(){
+        logger.info('Getting all metadata');
+        let filter = {};
+        let extendedFilter = {};
+        if(this.query.application){filter.application = this.query.application;}
+        if(this.query.language){filter.language = this.query.language;}
+        if(this.query.limit){filter.limit = this.query.limit;}
+        if(this.query.type){extendedFilter.type = this.query.type;}
+        let result = yield MetadataService.getAll(filter, extendedFilter);
+        this.body = MetadataSerializer.serialize(result);
+    }
+
+    static * getByIds(){
+        if(!this.request.body.ids){
+            this.throw(400, 'Bad request');
+            return;
+        }
+        logger.info(`Getting metadata by ids: ${this.request.body.ids}`);
+        let resource = {
+            ids: this.request.body.ids
+        };
+        if(typeof resource.ids === 'string'){
+            resource.ids = resource.ids.split(',').map(function(elem){return elem.trim();});
+        }
+        resource.type = MetadataRouter.getResourceTypeByPath(this.path);
+        let filter = {};
+        if(this.query.application){filter.application = this.query.application;}
+        if(this.query.language){filter.language = this.query.language;}
+        if(this.query.limit){filter.limit = this.query.limit;}
+        let result = yield MetadataService.getByIds(resource, filter);
+        this.body = MetadataSerializer.serialize(result);
     }
 
 }
 
-var validateApplication = function *(next){
-    logger.debug('Apps', APPLICATIONS);
-    if(this.params.application && APPLICATIONS.indexOf(this.params.application) > -1){
-        yield next;
-    } else {
-        this.throw(400, `Application not found. Available applications ${APPLICATIONS.join(',')}`);
+// Negative checking
+const authorizationMiddleware = function*(next) {
+    // Check delete
+    if(this.request.method === 'DELETE' && (!this.request.query.language || !this.request.query.application)){
+        this.throw(400, 'Bad request');
+        return;
     }
+    // Get user from query (delete) or body (post-patch)
+    let user = Object.assign({}, this.request.query.loggedUser? JSON.parse(this.request.query.loggedUser): {}, this.request.body.loggedUser);
+    if(!user || USER_ROLES.indexOf(user.role) === -1){
+        this.throw(401, 'Unauthorized'); //if not logged or invalid ROLE-> out
+        return;
+    }
+    if(user.role === 'USER'){
+        this.throw(403, 'Forbidden'); // if USER -> out
+        return;
+    }
+    // Get application from query (delete) or body (post-patch)
+    let application = this.request.query.application? this.request.query.application: this.request.body.application;
+    if(user.role === 'MANAGER' || user.role === 'ADMIN'){
+        if(user.extraUserData.apps.indexOf(application) === -1){
+            this.throw(403, 'Forbidden'); // if manager or admin but no application -> out
+            return;
+        }
+        if(user.role === 'MANAGER' && this.request.method !== 'POST'){ // extra check if a MANAGER wants to update or delete
+            let resource = MetadataRouter.getResource(this.params);
+            let permission = yield MetadataService.hasPermission(user, this.params.dataset, resource, this.request.body);
+            if(!permission){
+                this.throw(403, 'Forbidden');
+                return;
+            }
+        }
+    }
+    yield next; // SUPERADMIN is included here
 };
 
+// Validator Wrapper
+const validationMiddleware = function*(next){
+    if(!this.request.body || !this.request.body.application || !this.request.body.language){
+        this.throw(400, 'Bad request');
+        return;
+    }
+    try{
+        yield MetadataValidator.validate(this);
+    } catch(err) {
+        if(err instanceof MetadataNotValid){
+            this.throw(400, err.getMessages());
+            return;
+        }
+        throw err;
+    }
+    yield next;
+};
 
-router.get('/:dataset', MetadataRouter.query);
-router.get('/:dataset/:application', MetadataRouter.query);
-router.post('/:dataset/:application', validateApplication,  MetadataRouter.create);
-router.delete('/:dataset/:application', validateApplication, MetadataRouter.delete);
-router.delete('/:dataset', MetadataRouter.delete);
-router.patch('/:dataset/:application', validateApplication, MetadataRouter.update);
-router.post('/find-by-ids', MetadataRouter.findByIds);
+// dataset
+router.get('/dataset/:dataset/metadata', MetadataRouter.get);
+router.post('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
+// widget
+router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
+router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
+// layer
+router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
+router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
+// generic
+router.get('/metadata', MetadataRouter.getAll);
+// get by id
+router.post('/dataset/metadata/get-by-ids', MetadataRouter.getByIds);
+router.post('/dataset/:dataset/widget/metadata/get-by-ids', MetadataRouter.getByIds);
+router.post('/dataset/:dataset/layer/metadata/get-by-ids', MetadataRouter.getByIds);
 
 module.exports = router;

@@ -5,7 +5,7 @@ ENV NAME rw-metadata
 ENV USER microservice
 
 RUN apk update && apk upgrade && \
-    apk add --no-cache --update bash git openssh python build-base
+    apk add --no-cache --update bash git openssh python build-base curl
 
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
@@ -24,7 +24,7 @@ COPY ./app /opt/$NAME/app
 RUN chown $USER:$USER /opt/$NAME
 
 # Tell Docker we are going to use this ports
-EXPOSE 5000
+EXPOSE 4000
 USER $USER
 
 ENTRYPOINT ["./entrypoint.sh"]

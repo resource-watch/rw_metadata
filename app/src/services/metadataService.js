@@ -7,86 +7,140 @@ const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
 
 class MetadataService {
-    static * query(dataset, application){
-        logger.info(`Obtaining metadata with dataset ${dataset} and application ${application}`);
-        let filters = {};
-        if(dataset){
-            filters.dataset = dataset;
+
+    static getFilter(_filter){
+        var filter = {};
+        if(_filter && _filter.application){
+            filter.application = { $in: _filter.application.split(',') };
         }
-        if(application){
-            filters.application = application;
+        if(_filter && _filter.language){
+            filter.language = { $in: _filter.language.split(',') };
         }
-        return yield Metadata.find(filters).exec();
+        return filter;
     }
 
-    static * findByIds(filter){
-        logger.info(`Obtaining metadata with filters ${filter}`);
-        let filters = {};
-        if(filter && filter.ids){
-            filters.dataset = {
-                $in: filter.ids
-            };
-        }
-        if(filter && filter.application){
-            filters.application = filter.application;
-        }
-        return yield Metadata.find(filters).exec();
-    }
-
-    static * create(dataset, application, body){
-        logger.info(`Creating metadata with dataset ${dataset} and application ${application}`);
-        logger.debug('Checking if exist');
-        let exists = yield Metadata.findOne({
+    static * get(dataset, resource, filter){
+        let _query = {
             dataset: dataset,
-            application: application
+            'resource.id': resource.id,
+            'resource.type': resource.type
+        };
+        let query = Object.assign(_query, MetadataService.getFilter(filter));
+        let limit = (isNaN(parseInt(filter.limit))) ? 0:parseInt(filter.limit);
+        logger.debug('Getting metadata');
+        return yield Metadata.find(query).limit(limit).exec();
+    }
+
+    static * create(user, dataset, resource, body){
+        logger.debug('Checking if metadata exists');
+        let _metadata = yield Metadata.findOne({
+            dataset: dataset,
+            'resource.id': resource.id,
+            'resource.type': resource.type,
+            application: body.application,
+            language: body.language
         }).exec();
-        logger.debug(exists);
-        if(exists){
-            logger.error('Metadata exists!!');
-            throw new MetadataDuplicated(`Metadata with dataset ${dataset} and application ${application} exists`);
+        if(_metadata){
+            logger.error('Error creating metadata');
+            throw new MetadataDuplicated(`Metadata of resource ${resource.type}: ${resource.id}, application: ${body.application} and language: ${body.language} already exists`);
         }
         logger.debug('Creating metadata');
         let metadata = new Metadata({
             dataset: dataset,
-            application: application,
-            info: body
+            resource: resource,
+            application: body.application,
+            language: body.language,
+            userId: user.id,
+            name: body.name,
+            description: body.description,
+            source: body.source,
+            citation: body.citation,
+            license: body.license,
+            info: body.info
         });
-        yield metadata.save();
+        return metadata.save();
+    }
+
+    static * update(dataset, resource, body){
+        let metadata = yield Metadata.findOne({
+            dataset: dataset,
+            'resource.id': resource.id,
+            'resource.type': resource.type,
+            application: body.application,
+            language: body.language
+        }).exec();
+        if(!metadata){
+            logger.error('Error updating metadata');
+            throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
+        }
+        logger.debug('Updating metadata');
+        metadata.name = body.name ? body.name:metadata.name;
+        metadata.description = body.description ? body.description:metadata.description;
+        metadata.source = body.source ? body.source:metadata.source;
+        metadata.citation = body.citation ? body.citation:metadata.citation;
+        metadata.license = body.license ? body.license:metadata.license;
+        metadata.info = body.info ? body.info:metadata.info;
+        metadata.updatedAt = new Date();
+        return metadata.save();
+    }
+
+    static * delete(dataset, resource, filter){
+        let _query = {
+            dataset: dataset,
+            'resource.id': resource.id,
+            'resource.type': resource.type
+        };
+        let query = Object.assign(_query, MetadataService.getFilter(filter));
+        let metadata = yield Metadata.find(query).exec();
+        if(!metadata){
+            logger.error('Error deleting metadata');
+            throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
+        }
+        logger.debug('Deleting metadata');
+        yield Metadata.remove(query).exec();
         return metadata;
     }
 
-    static * update(dataset, application, body){
-        logger.info(`Updating metadata with dataset ${dataset} and application ${application}`);
-        let exists = yield Metadata.findOne({
-            dataset: dataset,
-            application: application
-        }).exec();
-        if(!exists){
-            logger.error('Metadata not exist!!');
-            throw new MetadataNotFound(`Metadata with dataset ${dataset} and application ${application} not found`);
+    static * getAll(_filter, extendedFilter){
+        let filter = MetadataService.getFilter(_filter);
+        if(extendedFilter && extendedFilter.type){
+            filter['resource.type'] = extendedFilter.type;
         }
-        logger.debug('Updating metadata');
-        exists.info = body;
-        yield exists.save();
-        return exists;
+        let limit = (isNaN(parseInt(_filter.limit))) ? 0:parseInt(_filter.limit);
+        logger.debug('Getting metadata');
+        return yield Metadata.find(filter).limit(limit).exec();
     }
 
-    static * delete(dataset, application){
-        logger.info(`Deleting metadata with dataset ${dataset} and application ${application}`);
-        let filters = {};
-        if(dataset){
-            filters.dataset = dataset;
+    static * getByIds(resource, filter){
+        logger.debug(`Getting metadata with ids ${resource.ids}`);
+        let _query = {
+            'resource.id': { $in: resource.ids },
+            'resource.type': resource.type
+        };
+        let query = Object.assign(_query, MetadataService.getFilter(filter));
+        let limit = (isNaN(parseInt(filter.limit))) ? 0:parseInt(filter.limit);
+        logger.debug('Getting metadata');
+        return yield Metadata.find(query).limit(limit).exec();
+    }
+
+    /*
+    * @returns: hasPermission: <Boolean>
+    */
+    static * hasPermission(user, dataset, resource, body){
+        let permission = true;
+        let metadata = yield Metadata.findOne({
+            dataset: dataset,
+            'resource.id': resource.id,
+            'resource.type': resource.type,
+            application: body.application,
+            language: body.language
+        }).exec();
+        if(metadata){
+            if(metadata.userId !== 'legacy' && metadata.userId !== user.id){
+                permission = false;
+            }
         }
-        if(application){
-            filters.application = application;
-        }
-        let metadatas = yield Metadata.find(filters).exec();
-        if(!metadatas || metadatas.length === 0){
-            return null;
-        }
-        logger.debug('Removing metadata');
-        yield Metadata.remove(filters).exec();
-        return metadatas;
+        return permission;
     }
 
 }

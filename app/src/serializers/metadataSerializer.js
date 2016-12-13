@@ -3,10 +3,9 @@
 var logger = require('logger');
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 var metadataSerializer = new JSONAPISerializer('metadata', {
-    attributes: ['info', 'application', 'dataset'],
-    info:{
-        pluralizeType: false
-    },
+    attributes: ['dataset', 'application', 'resource',
+        'language', 'name', 'description', 'source', 'citation',
+        'license', 'info'],
     pluralizeType: false,
     keyForAttribute: 'camelCase'
 });
@@ -24,12 +23,22 @@ class MetadataSerializer {
             }
             data.forEach(function(el){
                 result.data.push({
-                    id: el._id,
+                    id: el.dataset + '-' + el.resource.type + '-' + el.resource.id + '-' + el.application + '-' + el.language,
                     type: 'metadata',
                     attributes:{
                         dataset: el.dataset,
                         application: el.application,
-                        info: el.info
+                        resource: el.resource,
+                        language: el.language,
+                        name: el.name,
+                        description: el.description,
+                        source: el.source,
+                        citation: el.citation,
+                        license: el.license,
+                        info: el.info,
+                        createdAt: el.createdAt,
+                        updatedAt: el.updatedAt,
+                        status: el.status
                     }
                 });
             });

@@ -1,11 +1,11 @@
 prod:
-  image: vizzuality/rw-metadata:1.0.0${STAGING}
+  image: vizzuality/rw-metadata:2.1.0${STAGING}
   ports:
-    - "5000"
+    - "4000"
   env_file:
     - prod.env
   command: start
-  dns: ${DNS_SERVER}  
+  dns: ${DNS_SERVER}
   restart: always
   log_driver: "syslog"
   log_opt:
