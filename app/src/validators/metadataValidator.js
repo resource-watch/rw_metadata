@@ -15,6 +15,12 @@ class MetadataValidator{
         koaObj.checkBody('source').optional().isAscii();
         koaObj.checkBody('citation').optional().isAscii();
         koaObj.checkBody('license').optional().isAscii();
+        koaObj.checkBody('units').optional().check(function(){
+            if(this.units instanceof Object && this.units.length === undefined){
+                return true;
+            }
+            return false;
+        }.bind(koaObj.request.body));
         koaObj.checkBody('info').optional().check(function(){
             if(this.info instanceof Object && this.info.length === undefined){
                 return true;
