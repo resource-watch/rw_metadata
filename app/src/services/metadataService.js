@@ -56,6 +56,7 @@ class MetadataService {
             source: body.source,
             citation: body.citation,
             license: body.license,
+            units: body.units,
             info: body.info
         });
         return metadata.save();
@@ -91,7 +92,7 @@ class MetadataService {
             'resource.type': resource.type
         };
         let query = Object.assign(_query, MetadataService.getFilter(filter));
-        let metadata = yield Metadata.find(query).exec();
+        let metadata = yield Metadata.findOne(query).exec();
         if(!metadata){
             logger.error('Error deleting metadata');
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
@@ -118,9 +119,8 @@ class MetadataService {
             'resource.type': resource.type
         };
         let query = Object.assign(_query, MetadataService.getFilter(filter));
-        let limit = (isNaN(parseInt(filter.limit))) ? 0:parseInt(filter.limit);
         logger.debug('Getting metadata');
-        return yield Metadata.find(query).limit(limit).exec();
+        return yield Metadata.find(query).exec();
     }
 
     /*

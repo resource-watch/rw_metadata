@@ -8,7 +8,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['RW Adapter CSV'],
+  app_name: ['RW Metadata'],
   /**
    * Your New Relic license key.
    */

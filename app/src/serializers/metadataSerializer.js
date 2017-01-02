@@ -35,6 +35,7 @@ class MetadataSerializer {
                         source: el.source,
                         citation: el.citation,
                         license: el.license,
+                        units: el.units,
                         info: el.info,
                         createdAt: el.createdAt,
                         updatedAt: el.updatedAt,

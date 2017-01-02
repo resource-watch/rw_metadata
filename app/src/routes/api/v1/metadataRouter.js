@@ -127,7 +127,6 @@ class MetadataRouter {
         let filter = {};
         if(this.query.application){filter.application = this.query.application;}
         if(this.query.language){filter.language = this.query.language;}
-        if(this.query.limit){filter.limit = this.query.limit;}
         let result = yield MetadataService.getByIds(resource, filter);
         this.body = MetadataSerializer.serialize(result);
     }
@@ -172,10 +171,6 @@ const authorizationMiddleware = function*(next) {
 
 // Validator Wrapper
 const validationMiddleware = function*(next){
-    if(!this.request.body || !this.request.body.application || !this.request.body.language){
-        this.throw(400, 'Bad request');
-        return;
-    }
     try{
         yield MetadataValidator.validate(this);
     } catch(err) {
@@ -190,18 +185,18 @@ const validationMiddleware = function*(next){
 
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.post('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
 // widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.post('/dataset/:dataset/widget/:widget/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/widget/:widget/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
 // layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, validationMiddleware, MetadataRouter.update);
+router.post('/dataset/:dataset/layer/:layer/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/layer/:layer/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
 // generic
 router.get('/metadata', MetadataRouter.getAll);

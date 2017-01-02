@@ -1,10 +1,10 @@
 # Resource Watch Metadata Microservice
 
-This repository implements the metadata services that are available in the Resource Watch API. 
+This repository implements the metadata services that are available in the Resource Watch API.
 
 If you are looking for the API Doc (Info and Usage) please go to the next link:
 [View the documentation for this
-API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/resource-watch/rw_metadata/master/application/microservice/swagger.yml#/)
+API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/resource-watch/rw_metadata/master/application/microservice/swagger.yml#/) (not yet)
 
 ## Quick Overview
 

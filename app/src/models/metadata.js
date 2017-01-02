@@ -18,6 +18,7 @@ var Metadata = new Schema({
     source: {type: String, required: false, trim: true},
     citation: {type: String, required: false, trim: true},
     license: {type: String, required: false, trim: true},
+    units: {type: Schema.Types.Mixed},
     info: {type: Schema.Types.Mixed},
     createdAt: {type: Date, default: Date.now},
     updatedAt: {type: Date, default: Date.now},
