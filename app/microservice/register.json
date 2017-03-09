@@ -1,14 +1,14 @@
 {
     "name": "#(service.name)",
     "endpoints": [{
-        "path": "/dataset/:dataset/metadata",
+        "path": "/v1/dataset/:dataset/metadata",
         "method": "GET",
         "redirect": {
             "method": "GET",
             "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/metadata",
+        "path": "/v1/dataset/:dataset/metadata",
         "method": "POST",
         "authenticated": true,
         "redirect": {
@@ -16,7 +16,7 @@
             "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/metadata",
+        "path": "/v1/dataset/:dataset/metadata",
         "method": "PATCH",
         "authenticated": true,
         "redirect": {
@@ -24,7 +24,7 @@
             "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/metadata",
+        "path": "/v1/dataset/:dataset/metadata",
         "method": "DELETE",
         "authenticated": true,
         "redirect": {
@@ -32,14 +32,14 @@
             "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "path": "/v1/dataset/:dataset/widget/:widget/metadata",
         "method": "GET",
         "redirect": {
             "method": "GET",
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "path": "/v1/dataset/:dataset/widget/:widget/metadata",
         "method": "POST",
         "authenticated": true,
         "redirect": {
@@ -47,7 +47,7 @@
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "path": "/v1/dataset/:dataset/widget/:widget/metadata",
         "method": "PATCH",
         "authenticated": true,
         "redirect": {
@@ -55,7 +55,7 @@
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/widget/:widget/metadata",
+        "path": "/v1/dataset/:dataset/widget/:widget/metadata",
         "method": "DELETE",
         "authenticated": true,
         "redirect": {
@@ -63,14 +63,14 @@
             "path": "/api/v1/dataset/:dataset/widget/:widget/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "path": "/v1/dataset/:dataset/layer/:layer/metadata",
         "method": "GET",
         "redirect": {
             "method": "GET",
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "path": "/v1/dataset/:dataset/layer/:layer/metadata",
         "method": "POST",
         "authenticated": true,
         "redirect": {
@@ -78,7 +78,7 @@
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "path": "/v1/dataset/:dataset/layer/:layer/metadata",
         "method": "PATCH",
         "authenticated": true,
         "redirect": {
@@ -86,7 +86,7 @@
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
     }, {
-        "path": "/dataset/:dataset/layer/:layer/metadata",
+        "path": "/v1/dataset/:dataset/layer/:layer/metadata",
         "method": "DELETE",
         "authenticated": true,
         "redirect": {
@@ -94,28 +94,28 @@
             "path": "/api/v1/dataset/:dataset/layer/:layer/metadata"
         }
     }, {
-        "path": "/metadata",
+        "path": "/v1/metadata",
         "method": "GET",
         "redirect": {
             "method": "GET",
             "path": "/api/v1/metadata"
         }
     }, {
-        "path": "/dataset/metadata/find-by-ids",
+        "path": "/v1/dataset/metadata/find-by-ids",
         "method": "POST",
         "redirect": {
             "method": "POST",
             "path": "/api/v1/dataset/metadata/get-by-ids/"
         }
     }, {
-        "path": "/dataset/:dataset/widget/metadata/find-by-ids",
+        "path": "/v1/dataset/:dataset/widget/metadata/find-by-ids",
         "method": "POST",
         "redirect": {
             "method": "POST",
             "path": "/api/v1/dataset/:dataset/widget/metadata/get-by-ids"
         }
     }, {
-        "path": "/dataset/:dataset/layer/metadata/find-by-ids",
+        "path": "/v1/dataset/:dataset/layer/metadata/find-by-ids",
         "method": "POST",
         "redirect": {
             "method": "POST",
