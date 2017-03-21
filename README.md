@@ -23,6 +23,7 @@ description: <String>
 source: <String>
 citation: <String>
 license: <String>
+units: <Object>
 info: <Object>
 createdAt: <Date>
 updatedAt: <Date>

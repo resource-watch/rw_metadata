@@ -1,6 +1,6 @@
 {
   "name": "rw-metadata",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Resource Watch - Metadata",
   "main": "index.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "bunyan": "1.7.1",
     "co": "4.6.0",
     "config": "1.19.0",
-    "ct-register-microservice-node": "^1.0.5",
+    "ct-register-microservice-node": "^2.1.2",
     "jsonapi-serializer": "2.1.1",
     "koa": "1.1.2",
     "koa-bodyparser": "2.0.1",
