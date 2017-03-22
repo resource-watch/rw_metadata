@@ -62,6 +62,13 @@ class MetadataService {
         return metadata.save();
     }
 
+    static * createSome(user, metadatas, dataset, resource) {
+        for (let i = 0; i < metadatas.length; i++) {
+            yield MetadataService.create(user, dataset, resource, metadatas[i]);
+        }
+        return yield MetadataService.get(dataset, resource, {});
+    }
+
     static * update(dataset, resource, body){
         let metadata = yield Metadata.findOne({
             dataset: dataset,
@@ -121,6 +128,20 @@ class MetadataService {
         let query = Object.assign(_query, MetadataService.getFilter(filter));
         logger.debug('Getting metadata');
         return yield Metadata.find(query).exec();
+    }
+
+    static * clone(user, dataset, resource, body) {
+        logger.debug('Checking if metadata exists');
+        let metadatas = yield MetadataService.get(dataset, resource, {});
+        metadatas = metadatas.map(metadata => metadata.toObject());
+        if (metadatas.length === 0) {
+            throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
+        }
+        try {
+            return yield MetadataService.createSome(user, metadatas, body.newDataset, { type: 'dataset', id: body.newDataset });
+        } catch (err) {
+            throw err;
+        }
     }
 
     /*

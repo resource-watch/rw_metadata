@@ -9,6 +9,7 @@ var MetadataValidator = require('validators/metadataValidator');
 const MetadataNotFound = require('errors/metadataNotFound');
 const MetadataDuplicated = require('errors/metadataDuplicated');
 const MetadataNotValid = require('errors/metadataNotValid');
+const CloneNotValid = require('errors/cloneNotValid');
 const USER_ROLES = require('appConstants').USER_ROLES;
 
 var router = new Router();
@@ -131,6 +132,23 @@ class MetadataRouter {
         this.body = MetadataSerializer.serialize(result);
     }
 
+    static * clone() {
+        const resource = MetadataRouter.getResource(this.params);
+        const newDataset = this.request.body.newDataset;
+        logger.info(`Cloning metadata of ${resource.type}: ${resource.id} in ${newDataset}`);
+        try {
+            const user = this.request.body.loggedUser;
+            const result = yield MetadataService.clone(user, this.params.dataset, resource, this.request.body);
+            this.body = MetadataSerializer.serialize(result);
+        } catch (err) {
+            if (err instanceof MetadataDuplicated) {
+                this.throw(400, err.message);
+                return;
+            }
+            throw err;
+        }
+    }
+
 }
 
 // Negative checking
@@ -142,6 +160,10 @@ const authorizationMiddleware = function*(next) {
     }
     // Get user from query (delete) or body (post-patch)
     let user = Object.assign({}, this.request.query.loggedUser? JSON.parse(this.request.query.loggedUser): {}, this.request.body.loggedUser);
+    if (user.id === 'microservice') {
+        yield next;
+        return;
+    }
     if(!user || USER_ROLES.indexOf(user.role) === -1){
         this.throw(401, 'Unauthorized'); //if not logged or invalid ROLE-> out
         return;
@@ -183,9 +205,24 @@ const validationMiddleware = function*(next){
     yield next;
 };
 
+// Validator Wrapper
+const cloneValidationMiddleware = function*(next){
+    try{
+        yield MetadataValidator.validateClone(this);
+    } catch(err) {
+        if(err instanceof CloneNotValid){
+            this.throw(400, err.getMessages());
+            return;
+        }
+        throw err;
+    }
+    yield next;
+};
+
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
 router.post('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.post('/dataset/:dataset/metadata/clone', cloneValidationMiddleware, authorizationMiddleware, MetadataRouter.clone);
 router.patch('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
 router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
 // widget
