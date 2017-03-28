@@ -1,4 +1,3 @@
-
 class ErrorSerializer {
 
     static serializeValidationError(data, typeParam) {
@@ -16,7 +15,6 @@ class ErrorSerializer {
             message = '';
 
         }
-
         return {
             source: {
                 parameter: keys[0]

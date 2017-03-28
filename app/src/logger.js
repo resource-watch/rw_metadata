@@ -5,6 +5,7 @@ const bunyan = require('bunyan');
  * Create Logger
  */
 module.exports = (() => {
+
     const streams = [{
         level: config.get('logger.level') || 'debug',
         stream: process.stdout
@@ -22,4 +23,4 @@ module.exports = (() => {
     });
     return logger;
 
-}());
+})();

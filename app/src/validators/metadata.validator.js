@@ -1,7 +1,7 @@
 
 const logger = require('logger');
-const MetadataNotValid = require('errors/metadataNotValid');
-const CloneNotValid = require('errors/cloneNotValid');
+const MetadataNotValid = require('errors/metadataNotValid.error');
+const CloneNotValid = require('errors/cloneNotValid.error');
 
 class MetadataValidator {
 
