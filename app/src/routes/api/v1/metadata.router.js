@@ -8,7 +8,7 @@ const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
 const MetadataNotValid = require('errors/metadataNotValid.error');
 const CloneNotValid = require('errors/cloneNotValid.error');
-const USER_ROLES = require('appConstants').USER_ROLES;
+const USER_ROLES = require('app.constants').USER_ROLES;
 
 const router = new Router();
 

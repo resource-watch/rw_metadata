@@ -1,8 +1,8 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const RESOURCES = require('appConstants').RESOURCES;
-const STATUS = require('appConstants').STATUS;
+const RESOURCES = require('app.constants').RESOURCES;
+const STATUS = require('app.constants').STATUS;
 
 const Metadata = new Schema({
     dataset: { type: String, required: true, trim: true },
@@ -21,6 +21,7 @@ const Metadata = new Schema({
     units: { type: Schema.Types.Mixed },
     info: { type: Schema.Types.Mixed },
     fields: { type: Schema.Types.Mixed },
+    applicationProperties: { type: Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     status: { type: String, enum: STATUS, default: 'published' }
