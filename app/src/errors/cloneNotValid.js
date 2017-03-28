@@ -7,12 +7,14 @@ class CloneNotValid extends Error {
         this.messages = messages;
     }
 
-    getMessages(){
-        var messages = '- ';
-        this.messages.forEach(function(message){
-            messages += Object.keys(message)[0] + ': ' + message[Object.keys(message)[0]] + ' - ';
+    getMessages() {
+        let messages = '- ';
+        this.messages.forEach((message) => {
+            messages += `${Object.keys(message)[0]}: ${message[Object.keys(message)[0]]} - `;
         });
         return messages;
     }
+
 }
+
 module.exports = CloneNotValid;

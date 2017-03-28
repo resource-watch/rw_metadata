@@ -1,11 +1,12 @@
-'use strict';
 
-class MetadataNotFound extends Error{
+class MetadataNotFound extends Error {
 
-    constructor(message){
+    constructor(message) {
         super(message);
         this.name = 'MetadataNotFound';
         this.message = message;
     }
+
 }
+
 module.exports = MetadataNotFound;

@@ -1,44 +1,63 @@
-'use strict';
 
 const logger = require('logger');
-const config = require('config');
 const MetadataNotValid = require('errors/metadataNotValid');
 const CloneNotValid = require('errors/cloneNotValid');
 
-class MetadataValidator{
+class MetadataValidator {
 
-    static * validate(koaObj){
+    static isArray(property) {
+        if (property instanceof Array) {
+            return true;
+        }
+        return false;
+    }
+
+    static isObject(property) {
+        if (property instanceof Object && property.length === undefined) {
+            return true;
+        }
+        return false;
+    }
+
+    static validate(koaObj) {
         logger.info('Validating Metadata Creation');
         koaObj.checkBody('language').notEmpty().toLow();
-        koaObj.checkBody('application').notEmpty().toLow();
+        koaObj.checkBody('application').notEmpty().isAscii()
+        .toLow();
         koaObj.checkBody('name').optional().isAscii();
         koaObj.checkBody('description').optional().isAscii();
         koaObj.checkBody('source').optional().isAscii();
         koaObj.checkBody('citation').optional().isAscii();
         koaObj.checkBody('license').optional().isAscii();
-        koaObj.checkBody('units').optional().check(function(){
-            if(this.units instanceof Object && this.units.length === undefined){
+        koaObj.checkBody('units').optional().check((units) => {
+            if (MetadataValidator.isObject(units)) {
                 return true;
             }
             return false;
-        }.bind(koaObj.request.body));
-        koaObj.checkBody('info').optional().check(function(){
-            if(this.info instanceof Object && this.info.length === undefined){
+        });
+        koaObj.checkBody('info').optional().check((info) => {
+            if (MetadataValidator.isObject(info)) {
                 return true;
             }
             return false;
-        }.bind(koaObj.request.body));
-        if(koaObj.errors){
+        });
+        koaObj.checkBody('fields').optional().check((fields) => {
+            if (MetadataValidator.isObject(fields)) {
+                return true;
+            }
+            return false;
+        });
+        if (koaObj.errors) {
             logger.error('Error validating metadata creation');
             throw new MetadataNotValid(koaObj.errors);
         }
         return true;
     }
 
-    static * validateClone(koaObj){
+    static validateClone(koaObj) {
         logger.info('Validating Metadata Cloning');
         koaObj.checkBody('newDataset').notEmpty().toLow();
-        if(koaObj.errors){
+        if (koaObj.errors) {
             logger.error('Error validating metadata cloning');
             throw new CloneNotValid(koaObj.errors);
         }

@@ -1,31 +1,21 @@
-'use strict';
-
-var logger = require('logger');
-var JSONAPISerializer = require('jsonapi-serializer').Serializer;
-var metadataSerializer = new JSONAPISerializer('metadata', {
-    attributes: ['dataset', 'application', 'resource',
-        'language', 'name', 'description', 'source', 'citation',
-        'license', 'info'],
-    pluralizeType: false,
-    keyForAttribute: 'camelCase'
-});
 
 class MetadataSerializer {
 
     static serialize(data) {
 
-        let result = {
-            data:[]
+        const result = {
+            data: []
         };
-        if(data){
-            if(!Array.isArray(data)){
-                data = [data];
+        if (data) {
+            let serializeData = data;
+            if (!Array.isArray(data)) {
+                serializeData = [data];
             }
-            data.forEach(function(el){
+            serializeData.forEach((el) => {
                 result.data.push({
                     id: el._id,
                     type: 'metadata',
-                    attributes:{
+                    attributes: {
                         dataset: el.dataset,
                         application: el.application,
                         resource: el.resource,
@@ -46,6 +36,7 @@ class MetadataSerializer {
         }
         return result;
     }
+
 }
 
 module.exports = MetadataSerializer;
