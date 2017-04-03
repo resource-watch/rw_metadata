@@ -16,6 +16,14 @@
             "path": "/api/v1/dataset/:dataset/metadata"
         }
     }, {
+        "path": "/v1/dataset/:dataset/metadata/clone",
+        "method": "POST",
+        "authenticated": true,
+        "redirect": {
+            "method": "POST",
+            "path": "/api/v1/dataset/:dataset/metadata/clone"
+        }
+    }, {
         "path": "/v1/dataset/:dataset/metadata",
         "method": "PATCH",
         "authenticated": true,

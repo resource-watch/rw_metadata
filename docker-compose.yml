@@ -1,5 +1,5 @@
 prod:
-  image: vizzuality/rw-metadata:2.2.0${STAGING}
+  image: vizzuality/rw-metadata:2.3.0${STAGING}
   ports:
     - "4000"
   env_file:

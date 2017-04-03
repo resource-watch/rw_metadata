@@ -25,6 +25,7 @@ citation: <String>
 license: <String>
 units: <Object>
 info: <Object>
+fields: <Object>
 createdAt: <Date>
 updatedAt: <Date>
 status: <String>, [published, unpublished]
