@@ -83,7 +83,7 @@ class MetadataValidator {
                 return true;
             }
             return false;
-        });
+        }, 'should be a valid object');
         koaObj.checkBody('info').optional().check((info) => {
             if (MetadataValidator.isObject(info)) {
                 return true;
@@ -95,7 +95,7 @@ class MetadataValidator {
                 return true;
             }
             return false;
-        });
+        }, 'should be a valid object');
         if (koaObj.application) {
             koaObj.checkBody('applicationProperties').optional()
             .check(applicationProperties => MetadataValidator.checkApplicationProperties(applicationProperties, koaObj), `Required fields - ${Object.keys(METADATA_FIELDS[koaObj.request.body.application])}`);
