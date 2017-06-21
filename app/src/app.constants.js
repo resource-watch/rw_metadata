@@ -54,6 +54,53 @@ const METADATA_FIELDS = {
         tags: {
             type: 'string',
         }
+    },
+    rw: {
+        short_title: {
+            type: 'string',
+        },
+        technical_title: {
+            type: 'string'
+        },
+        source: {
+            type: 'string'
+        },
+        function: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        cautions: {
+            type: 'string'
+        },
+        geographic_coverage: {
+            type: 'string'
+        },
+        spatial_resolution: {
+            type: 'string'
+        },
+        date_of_content: {
+            type: 'string'
+        },
+        frequency_of_updates: {
+            type: 'string'
+        },
+        license_summary: {
+            type: 'string'
+        },
+        link_to_full_license: {
+            type: 'string'
+        },
+        citation: {
+            type: 'string'
+        },
+        published_language: {
+            type: 'string'
+        },
+        published_title: {
+            type: 'string'
+        }
     }
 };
 
