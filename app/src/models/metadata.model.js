@@ -20,7 +20,7 @@ const Metadata = new Schema({
     license: { type: String, required: false, trim: true },
     units: { type: Schema.Types.Mixed },
     info: { type: Schema.Types.Mixed },
-    fields: { type: Schema.Types.Mixed },
+    columns: { type: Schema.Types.Mixed },
     applicationProperties: { type: Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },

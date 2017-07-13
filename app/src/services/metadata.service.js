@@ -56,7 +56,7 @@ class MetadataService {
             license: body.license,
             units: body.units,
             info: body.info,
-            fields: body.fields,
+            columns: body.columns,
             applicationProperties: body.applicationProperties
         });
         return await metadata.save();
@@ -88,7 +88,7 @@ class MetadataService {
         metadata.citation = body.citation ? body.citation : metadata.citation;
         metadata.license = body.license ? body.license : metadata.license;
         metadata.info = body.info ? body.info : metadata.info;
-        metadata.fields = body.fields ? body.fields : metadata.fields;
+        metadata.columns = body.columns ? body.columns : metadata.columns;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
         metadata.updatedAt = new Date();
         return await metadata.save();

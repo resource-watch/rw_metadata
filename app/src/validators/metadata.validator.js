@@ -90,8 +90,8 @@ class MetadataValidator {
             }
             return false;
         }, 'should be a valid object');
-        koaObj.checkBody('fields').optional().check((fields) => {
-            if (MetadataValidator.isObject(fields)) {
+        koaObj.checkBody('columns').optional().check((columns) => {
+            if (MetadataValidator.isObject(columns)) {
                 return true;
             }
             return false;

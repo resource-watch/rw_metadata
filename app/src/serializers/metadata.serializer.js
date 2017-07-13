@@ -27,7 +27,7 @@ class MetadataSerializer {
                         license: el.license,
                         units: el.units,
                         info: el.info,
-                        fields: el.fields,
+                        columns: el.columns,
                         applicationProperties: el.applicationProperties,
                         createdAt: el.createdAt,
                         updatedAt: el.updatedAt,
