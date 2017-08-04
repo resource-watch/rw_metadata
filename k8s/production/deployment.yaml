@@ -37,7 +37,7 @@ spec:
             valueFrom:
                 secretKeyRef:
                   name: dbsecrets
-                  key: DATASET_MONGO_URI
+                  key: METADATA_MONGO_URI
           - name: CT_URL
             valueFrom:
                 secretKeyRef:
