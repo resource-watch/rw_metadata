@@ -1,5 +1,7 @@
 {
-    "name": "#(service.name)",
+    "name": "Metadata service",
+    "cache": ["metadata"],
+	"uncache": ["metadata", "dataset", "widget", "layer"],
     "endpoints": [{
         "path": "/v1/dataset/:dataset/metadata",
         "method": "GET",
