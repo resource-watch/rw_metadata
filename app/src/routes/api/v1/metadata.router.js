@@ -2,6 +2,7 @@
 const Router = require('koa-router');
 const logger = require('logger');
 const MetadataService = require('services/metadata.service');
+const ResourceService = require('services/resource.service');
 const MetadataSerializer = require('serializers/metadata.serializer');
 const MetadataValidator = require('validators/metadata.validator');
 const MetadataNotFound = require('errors/metadataNotFound.error');
@@ -13,6 +14,14 @@ const USER_ROLES = require('app.constants').USER_ROLES;
 const router = new Router();
 
 class MetadataRouter {
+
+    static getUser(ctx) {
+        return JSON.parse(ctx.headers.user_key) ? JSON.parse(ctx.headers.user_key) : { id: null };
+    }
+
+    static getApplication(ctx) {
+        return JSON.parse(ctx.headers.app_key).application;
+    }
 
     static getResource(params) {
         let resource = { id: params.dataset, type: 'dataset' };
@@ -41,11 +50,12 @@ class MetadataRouter {
     static async get(ctx) {
         const resource = MetadataRouter.getResource(ctx.params);
         logger.info(`Getting metadata of ${resource.type}: ${resource.id}`);
+        const application = MetadataRouter.getApplication(ctx);
+        const dataset = ctx.params.dataset;
         const filter = {};
-        if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
-        const result = await MetadataService.get(ctx.params.dataset, resource, filter);
+        const result = await MetadataService.get(application, dataset, resource, filter);
         ctx.body = MetadataSerializer.serialize(result);
     }
 
@@ -53,8 +63,10 @@ class MetadataRouter {
         const resource = MetadataRouter.getResource(ctx.params);
         logger.info(`Creating metadata of ${resource.type}: ${resource.id}`);
         try {
-            const user = ctx.request.body.loggedUser;
-            const result = await MetadataService.create(user, ctx.params.dataset, resource, ctx.request.body);
+            const application = MetadataRouter.getApplication(ctx);
+            const user = MetadataRouter.getUser(ctx);
+            const dataset = ctx.params.dataset;
+            const result = await MetadataService.create(application, user, dataset, resource, ctx.request.body);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataDuplicated) {
@@ -69,7 +81,9 @@ class MetadataRouter {
         const resource = MetadataRouter.getResource(ctx.params);
         logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
         try {
-            const result = await MetadataService.update(ctx.params.dataset, resource, ctx.request.body);
+            const application = MetadataRouter.getApplication(ctx);
+            const dataset = ctx.params.dataset;
+            const result = await MetadataService.update(application, dataset, resource, ctx.request.body);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataNotFound) {
@@ -84,10 +98,11 @@ class MetadataRouter {
         const resource = MetadataRouter.getResource(ctx.params);
         logger.info(`Deleting metadata of ${resource.type}: ${resource.id}`);
         const filter = {};
-        if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         try {
-            const result = await MetadataService.delete(ctx.params.dataset, resource, filter);
+            const application = MetadataRouter.getApplication(ctx);
+            const dataset = ctx.params.dataset;
+            const result = await MetadataService.delete(application, dataset, resource, filter);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataNotFound) {
@@ -100,13 +115,13 @@ class MetadataRouter {
 
     static async getAll(ctx) {
         logger.info('Getting all metadata');
+        const application = MetadataRouter.getApplication(ctx);
         const filter = {};
         const extendedFilter = {};
-        if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
         if (ctx.query.type) { extendedFilter.type = ctx.query.type; }
-        const result = await MetadataService.getAll(filter, extendedFilter);
+        const result = await MetadataService.getAll(application, filter, extendedFilter);
         ctx.body = MetadataSerializer.serialize(result);
     }
 
@@ -123,10 +138,10 @@ class MetadataRouter {
             resource.ids = resource.ids.split(',').map((elem) => elem.trim());
         }
         resource.type = MetadataRouter.getResourceTypeByPath(ctx.path);
+        const application = MetadataRouter.getApplication(ctx);
         const filter = {};
-        if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
-        const result = await MetadataService.getByIds(resource, filter);
+        const result = await MetadataService.getByIds(application, resource, filter);
         ctx.body = MetadataSerializer.serialize(result);
     }
 
@@ -135,8 +150,10 @@ class MetadataRouter {
         const newDataset = ctx.request.body.newDataset;
         logger.info(`Cloning metadata of ${resource.type}: ${resource.id} in ${newDataset}`);
         try {
-            const user = ctx.request.body.loggedUser;
-            const result = await MetadataService.clone(user, ctx.params.dataset, resource, ctx.request.body);
+            const application = MetadataRouter.getApplication(ctx);
+            const user = MetadataRouter.getUser(ctx);
+            const dataset = ctx.params.dataset;
+            const result = await MetadataService.clone(application, user, dataset, resource, ctx.request.body);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataDuplicated) {
@@ -152,12 +169,12 @@ class MetadataRouter {
 // Negative checking
 const authorizationMiddleware = async (ctx, next) => {
     // Check delete
-    if (ctx.request.method === 'DELETE' && (!ctx.request.query.language || !ctx.request.query.application)) {
+    if (ctx.request.method === 'DELETE' && (!ctx.request.query.language)) {
         ctx.throw(400, 'Bad request');
         return;
     }
     // Get user from query (delete) or body (post-patch)
-    const user = Object.assign({}, ctx.request.query.loggedUser ? JSON.parse(ctx.request.query.loggedUser) : {}, ctx.request.body.loggedUser);
+    const user = MetadataRouter.getUser(ctx);
     if (user.id === 'microservice') {
         await next();
         return;
@@ -171,15 +188,28 @@ const authorizationMiddleware = async (ctx, next) => {
         return;
     }
     // Get application from query (delete) or body (post-patch)
-    const application = ctx.request.query.application ? ctx.request.query.application : ctx.request.body.application;
+    const application = MetadataRouter.getApplication(ctx);
+    const dataset = ctx.params.dataset;
+    const resource = MetadataRouter.getResource(ctx.params);
+    let permission;
+    try {
+        permission = await ResourceService.hasPermission(application, user, dataset, resource);
+        if (!permission) {
+            ctx.throw(403, 'Forbidden');
+            return;
+        }
+    } catch (err) {
+        logger.error(err);
+        ctx.throw(403, 'Forbidden');
+        return;
+    }
     if (user.role === 'MANAGER' || user.role === 'ADMIN') {
         if (user.extraUserData.apps.indexOf(application) === -1) {
             ctx.throw(403, 'Forbidden'); // if manager or admin but no application -> out
             return;
         }
         if (user.role === 'MANAGER' && ctx.request.method !== 'POST') { // extra check if a MANAGER wants to update or delete
-            const resource = MetadataRouter.getResource(ctx.params);
-            const permission = await MetadataService.hasPermission(user, ctx.params.dataset, resource, ctx.request.body);
+            permission = await MetadataService.hasPermission(application, user, dataset, resource, ctx.request.body);
             if (!permission) {
                 ctx.throw(403, 'Forbidden');
                 return;

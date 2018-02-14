@@ -72,7 +72,6 @@ class MetadataValidator {
     static validate(koaObj) {
         logger.info('Validating Metadata Creation');
         koaObj.checkBody('language').notEmpty().toLow();
-        koaObj.checkBody('application').notEmpty().check(application => MetadataValidator.notEmptyString(application));
         koaObj.checkBody('name').optional().check(name => MetadataValidator.isString(name), 'should be a valid string');
         koaObj.checkBody('description').optional().check(description => MetadataValidator.isString(description), 'should be a valid string');
         koaObj.checkBody('source').optional().check(source => MetadataValidator.isString(source), 'should be a valid string');

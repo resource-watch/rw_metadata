@@ -17,7 +17,6 @@ class MetadataSerializer {
                     type: 'metadata',
                     attributes: {
                         dataset: el.dataset,
-                        application: el.application,
                         resource: el.resource,
                         language: el.language,
                         name: el.name,

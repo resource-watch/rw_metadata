@@ -8,17 +8,15 @@ class MetadataService {
 
     static getFilter(filter) {
         const finalFilter = {};
-        if (filter && filter.application) {
-            finalFilter.application = { $in: filter.application.split(',') };
-        }
         if (filter && filter.language) {
             finalFilter.language = { $in: filter.language.split(',') };
         }
         return finalFilter;
     }
 
-    static async get(dataset, resource, filter) {
+    static async get(application, dataset, resource, filter) {
         const query = {
+            application,
             dataset,
             'resource.id': resource.id,
             'resource.type': resource.type
@@ -29,24 +27,24 @@ class MetadataService {
         return await Metadata.find(finalQuery).limit(limit).exec();
     }
 
-    static async create(user, dataset, resource, body) {
+    static async create(application, user, dataset, resource, body) {
         logger.debug('Checking if metadata exists');
         const currentMetadata = await Metadata.findOne({
+            application,
             dataset,
             'resource.id': resource.id,
             'resource.type': resource.type,
-            application: body.application,
             language: body.language
         }).exec();
         if (currentMetadata) {
             logger.error('Error creating metadata');
-            throw new MetadataDuplicated(`Metadata of resource ${resource.type}: ${resource.id}, application: ${body.application} and language: ${body.language} already exists`);
+            throw new MetadataDuplicated(`Metadata of resource ${resource.type}: ${resource.id}, and language: ${body.language} already exists`);
         }
         logger.debug('Creating metadata');
         const metadata = new Metadata({
             dataset,
             resource,
-            application: body.application,
+            application,
             language: body.language,
             userId: user.id,
             name: body.name,
@@ -62,19 +60,19 @@ class MetadataService {
         return await metadata.save();
     }
 
-    static async createSome(user, metadatas, dataset, resource) {
+    static async createSome(application, user, metadatas, dataset, resource) {
         for (let i = 0; i < metadatas.length; i++) {
-            await MetadataService.create(user, dataset, resource, metadatas[i]);
+            await MetadataService.create(application, user, dataset, resource, metadatas[i]);
         }
-        return await MetadataService.get(dataset, resource, {});
+        return await MetadataService.get(application, dataset, resource, {});
     }
 
-    static async update(dataset, resource, body) {
+    static async update(application, dataset, resource, body) {
         const metadata = await Metadata.findOne({
+            application,
             dataset,
             'resource.id': resource.id,
             'resource.type': resource.type,
-            application: body.application,
             language: body.language
         }).exec();
         if (!metadata) {
@@ -94,8 +92,9 @@ class MetadataService {
         return await metadata.save();
     }
 
-    static async delete(dataset, resource, filter) {
+    static async delete(application, dataset, resource, filter) {
         const query = {
+            application,
             dataset,
             'resource.id': resource.id,
             'resource.type': resource.type
@@ -104,15 +103,16 @@ class MetadataService {
         const metadata = await Metadata.findOne(query).exec();
         if (!metadata) {
             logger.error('Error deleting metadata');
-            throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
+            throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} and ${filter.language} doesn't exist`);
         }
         logger.debug('Deleting metadata');
         await Metadata.remove(finalQuery).exec();
         return metadata;
     }
 
-    static async getAll(filter, extendedFilter) {
+    static async getAll(application, filter, extendedFilter) {
         const finalFilter = MetadataService.getFilter(filter);
+        finalFilter.application = application;
         if (extendedFilter && extendedFilter.type) {
             finalFilter['resource.type'] = extendedFilter.type;
         }
@@ -121,9 +121,10 @@ class MetadataService {
         return await Metadata.find(finalFilter).limit(limit).exec();
     }
 
-    static async getByIds(resource, filter) {
+    static async getByIds(application, resource, filter) {
         logger.debug(`Getting metadata with ids ${resource.ids}`);
         const query = {
+            application,
             'resource.id': { $in: resource.ids },
             'resource.type': resource.type
         };
@@ -132,15 +133,15 @@ class MetadataService {
         return await Metadata.find(finalQuery).exec();
     }
 
-    static async clone(user, dataset, resource, body) {
+    static async clone(application, user, dataset, resource, body) {
         logger.debug('Checking if metadata exists');
-        let metadatas = await MetadataService.get(dataset, resource, {});
+        let metadatas = await MetadataService.get(application, dataset, resource, {});
         metadatas = metadatas.map(metadata => metadata.toObject());
         if (metadatas.length === 0) {
             throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
         }
         try {
-            return await MetadataService.createSome(user, metadatas, body.newDataset, { type: 'dataset', id: body.newDataset });
+            return await MetadataService.createSome(application, user, metadatas, body.newDataset, { type: 'dataset', id: body.newDataset });
         } catch (err) {
             throw err;
         }
@@ -149,13 +150,13 @@ class MetadataService {
     /*
     * @returns: hasPermission: <Boolean>
     */
-    static async hasPermission(user, dataset, resource, body) {
+    static async hasPermission(application, user, dataset, resource, body) {
         let permission = true;
         const metadata = await Metadata.findOne({
+            application,
             dataset,
             'resource.id': resource.id,
             'resource.type': resource.type,
-            application: body.application,
             language: body.language
         }).exec();
         if (metadata) {

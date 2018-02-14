@@ -32,7 +32,7 @@
     "bunyan": "1.8.5",
     "co": "4.6.0",
     "config": "^1.21.0",
-    "ct-register-microservice-node": "^2.1.2",
+    "ct-register-microservice-node": "^2.1.6",
     "jsonapi-serializer": "2.1.1",
     "kcors": "^2.1.1",
     "koa": "^2.0.0",
