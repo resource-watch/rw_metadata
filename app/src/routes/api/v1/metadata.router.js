@@ -102,6 +102,7 @@ class MetadataRouter {
         logger.info('Getting all metadata');
         const filter = {};
         const extendedFilter = {};
+        filter.search = ctx.query.search ? ctx.query.search.split(',').map(elem => elem.trim()) : [];
         if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
