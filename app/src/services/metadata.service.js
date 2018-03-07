@@ -14,6 +14,10 @@ class MetadataService {
         if (filter && filter.language) {
             finalFilter.language = { $in: filter.language.split(',') };
         }
+        if (filter.search.length > 0) {
+            finalFilter.name = new RegExp(filter.search.join('|'), 'i');
+            finalFilter.description = new RegExp(filter.search.join('|'), 'i');
+        }
         return finalFilter;
     }
 

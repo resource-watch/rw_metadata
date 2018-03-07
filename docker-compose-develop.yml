@@ -17,7 +17,7 @@ develop:
   volumes:
     - ./app:/opt/rw-metadata/app
 mongo:
-  image: mongo
+  image: mongo:3.4
   container_name: rw-metadata-mongo-develop
   command: --smallfiles
   ports:
