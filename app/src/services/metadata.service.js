@@ -116,9 +116,34 @@ class MetadataService {
     }
 
     static async getAll(filter, extendedFilter) {
-        const finalFilter = MetadataService.getFilter(filter);
+        let finalFilter = {};
+        if (filter && filter.application) {
+            finalFilter.application = { $in: filter.application.split(',') };
+        }
+        if (filter && filter.language) {
+            finalFilter.language = { $in: filter.language.split(',') };
+        }
         if (extendedFilter && extendedFilter.type) {
             finalFilter['resource.type'] = extendedFilter.type;
+        }
+        if (filter && filter.search && filter.search.length > 0) {
+            const searchFilter = [
+                { name: new RegExp(filter.search.join('|'), 'i') },
+                { description: new RegExp(filter.search.join('|'), 'i') }
+            ];
+            const tempFilter = {
+                $and: [
+                    { $or: searchFilter }
+                ]
+            };
+            if (Object.keys(finalFilter).length > 0){
+                tempFilter.$and.push({ $and: Object.keys(finalFilter).map((key) => {
+                    const q = {};
+                    q[key] = finalFilter[key];
+                    return q;
+                }) || [] });
+            }
+            finalFilter = tempFilter;
         }
         const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
