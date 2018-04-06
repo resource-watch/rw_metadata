@@ -128,8 +128,8 @@ class MetadataService {
         }
         if (filter && filter.search && filter.search.length > 0) {
             const searchFilter = [
-                { name: new RegExp(filter.search.join('|'), 'i') },
-                { description: new RegExp(filter.search.join('|'), 'i') }
+                { name: new RegExp(filter.search.map(w=>`(?=.*${w})`).join(''), 'i') },
+                { description: new RegExp(filter.search.map(w=>`(?=.*${w})`).join(''), 'i') }
             ];
             const tempFilter = {
                 $and: [
