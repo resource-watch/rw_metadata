@@ -107,6 +107,7 @@ class MetadataRouter {
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
         if (ctx.query.type) { extendedFilter.type = ctx.query.type; }
+        if (ctx.query.sort) { filter.sort = ctx.query.sort; }
         const result = await MetadataService.getAll(filter, extendedFilter);
         ctx.body = MetadataSerializer.serialize(result);
     }
