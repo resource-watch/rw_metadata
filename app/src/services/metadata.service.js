@@ -133,6 +133,21 @@ class MetadataService {
         if (extendedFilter && extendedFilter.type) {
             finalFilter['resource.type'] = extendedFilter.type;
         }
+        if (filter && filter.search && filter.search.length > 0) {
+            const tempFilter = {
+                $and: [
+                    {$text: {$search: filter.search.join(' ') }}
+                ]
+            };
+            if (Object.keys(finalFilter).length > 0){
+                tempFilter.$and.push({ $and: Object.keys(finalFilter).map((key) => {
+                    const q = {};
+                    q[key] = finalFilter[key];
+                    return q;
+                }) || [] });
+            }
+            finalFilter = tempFilter;
+        }
         const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
         return await Metadata.find(finalFilter, null, options).limit(limit).exec();

@@ -46,6 +46,7 @@ class MetadataRouter {
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
         const result = await MetadataService.get(ctx.params.dataset, resource, filter);
+        ctx.set('cache', `${resource.id}-metadata-all`);
         ctx.body = MetadataSerializer.serialize(result);
     }
 
@@ -55,6 +56,7 @@ class MetadataRouter {
         try {
             const user = ctx.request.body.loggedUser;
             const result = await MetadataService.create(user, ctx.params.dataset, resource, ctx.request.body);
+            ctx.set('uncache', `metadata ${resource.id}-metadata ${resource.id}-metadata-all`);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataDuplicated) {
@@ -70,6 +72,7 @@ class MetadataRouter {
         logger.info(`Updating metadata of ${resource.type}: ${resource.id}`);
         try {
             const result = await MetadataService.update(ctx.params.dataset, resource, ctx.request.body);
+            ctx.set('uncache', `metadata ${resource.id}-metadata ${resource.id}-metadata-all ${result.id}`);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataNotFound) {
@@ -88,6 +91,7 @@ class MetadataRouter {
         if (ctx.query.language) { filter.language = ctx.query.language; }
         try {
             const result = await MetadataService.delete(ctx.params.dataset, resource, filter);
+            ctx.set('uncache', `metadata ${resource.id}-metadata ${resource.id}-metadata-all ${result.reduce(el => `${el.id} `)}`);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataNotFound) {
@@ -102,13 +106,14 @@ class MetadataRouter {
         logger.info('Getting all metadata');
         const filter = {};
         const extendedFilter = {};
-        filter.search = ctx.query.search ? ctx.query.search.split(',').map(elem => elem.trim()) : [];
+        filter.search = ctx.query.search ? ctx.query.search.split(' ').map(elem => elem.trim()) : [];
         if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
         if (ctx.query.type) { extendedFilter.type = ctx.query.type; }
         if (ctx.query.sort) { filter.sort = ctx.query.sort; }
         const result = await MetadataService.getAll(filter, extendedFilter);
+        ctx.set('cache', `metadata`);
         ctx.body = MetadataSerializer.serialize(result);
     }
 
@@ -139,6 +144,7 @@ class MetadataRouter {
         try {
             const user = ctx.request.body.loggedUser;
             const result = await MetadataService.clone(user, ctx.params.dataset, resource, ctx.request.body);
+            ctx.set('uncache', `metadata`);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataDuplicated) {
