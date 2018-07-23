@@ -73,13 +73,13 @@ describe('EDIT METADATA:', () => {
 
         const responseTwo = await requester
             .delete(`/api/v1/dataset/${DATASET_METADATA_TWO.dataset}/metadata`)
-            .query({ language: 'en', loggedUser: JSON.stringify(ROLES.ADMIN) })
+            .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
             .send();
 
-        const loadedDatasetTwo = deserializeDataset(responseTwo);
-
         responseTwo.status.should.equal(200);
-        responseTwo.body.should.have.property('data').and.be.a('object');
+        responseTwo.body.should.have.property('data').and.be.a('array');
+
+        const loadedDatasetTwo = deserializeDataset(responseTwo)[0];
 
         const updatedDatasetOne = Object.assign({}, DATASET_METADATA_TWO, { dataset: DATASET_METADATA_ONE.dataset });
 

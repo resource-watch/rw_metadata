@@ -91,7 +91,7 @@ class MetadataRouter {
         if (ctx.query.language) { filter.language = ctx.query.language; }
         try {
             const result = await MetadataService.delete(ctx.params.dataset, resource, filter);
-            ctx.set('uncache', `metadata ${resource.id}-metadata ${resource.id}-metadata-all ${result.reduce(el => `${el.id} `)}`);
+            ctx.set('uncache', `metadata ${resource.id}-metadata ${resource.id}-metadata-all ${result.id}`);
             ctx.body = MetadataSerializer.serialize(result);
         } catch (err) {
             if (err instanceof MetadataNotFound) {
