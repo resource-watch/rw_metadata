@@ -28,9 +28,9 @@ class MetadataService {
             'resource.type': resource.type
         };
         const finalQuery = Object.assign(query, MetadataService.getFilter(filter));
-        const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
+        const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        return await Metadata.find(finalQuery).limit(limit).exec();
+        return Metadata.find(finalQuery).limit(limit).exec();
     }
 
     static async create(user, dataset, resource, body) {
@@ -63,14 +63,17 @@ class MetadataService {
             columns: body.columns,
             applicationProperties: body.applicationProperties
         });
-        return await metadata.save();
+        return metadata.save();
     }
 
     static async createSome(user, metadatas, dataset, resource) {
+        const results = [];
         for (let i = 0; i < metadatas.length; i++) {
-            await MetadataService.create(user, dataset, resource, metadatas[i]);
+            results.push(MetadataService.create(user, dataset, resource, metadatas[i]));
         }
-        return await MetadataService.get(dataset, resource, {});
+        await Promise.all(results);
+
+        return MetadataService.get(dataset, resource, {});
     }
 
     static async update(dataset, resource, body) {
@@ -95,7 +98,7 @@ class MetadataService {
         metadata.columns = body.columns ? body.columns : metadata.columns;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
         metadata.updatedAt = new Date();
-        return await metadata.save();
+        return metadata.save();
     }
 
     static async delete(dataset, resource, filter) {
@@ -116,11 +119,11 @@ class MetadataService {
     }
 
     static async getAll(filter, extendedFilter) {
-        const finalFilter = MetadataService.getFilter(filter);
+        let finalFilter = MetadataService.getFilter(filter);
         const options = {};
         if (filter.sort) {
             options.sort = {};
-            filter.sort.split(',').forEach(el => {
+            filter.sort.split(',').forEach((el) => {
                 let sign = el.slice(0, 1);
                 let key = el.slice(1);
                 if (sign !== '-') {
@@ -136,21 +139,23 @@ class MetadataService {
         if (filter && filter.search && filter.search.length > 0) {
             const tempFilter = {
                 $and: [
-                    {$text: {$search: filter.search.join(' ') }}
+                    { $text: { $search: filter.search.join(' ') } }
                 ]
             };
-            if (Object.keys(finalFilter).length > 0){
-                tempFilter.$and.push({ $and: Object.keys(finalFilter).map((key) => {
-                    const q = {};
-                    q[key] = finalFilter[key];
-                    return q;
-                }) || [] });
+            if (Object.keys(finalFilter).length > 0) {
+                tempFilter.$and.push({
+                    $and: Object.keys(finalFilter).map((key) => {
+                        const q = {};
+                        q[key] = finalFilter[key];
+                        return q;
+                    }) || []
+                });
             }
             finalFilter = tempFilter;
         }
-        const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
+        const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        return await Metadata.find(finalFilter, null, options).limit(limit).exec();
+        return Metadata.find(finalFilter, null, options).limit(limit).exec();
     }
 
     static async getByIds(resource, filter) {
@@ -161,7 +166,7 @@ class MetadataService {
         };
         const finalQuery = Object.assign(query, MetadataService.getFilter(filter));
         logger.debug('Getting metadata');
-        return await Metadata.find(finalQuery).exec();
+        return Metadata.find(finalQuery).exec();
     }
 
     static async clone(user, dataset, resource, body) {

@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 const ctRegisterMicroservice = require('ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
+
 const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
 const koaBody = require('koa-body')({

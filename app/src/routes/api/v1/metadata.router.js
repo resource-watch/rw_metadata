@@ -8,7 +8,7 @@ const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
 const MetadataNotValid = require('errors/metadataNotValid.error');
 const CloneNotValid = require('errors/cloneNotValid.error');
-const USER_ROLES = require('app.constants').USER_ROLES;
+const { USER_ROLES } = require('app.constants');
 
 const router = new Router();
 
@@ -127,7 +127,7 @@ class MetadataRouter {
             ids: ctx.request.body.ids
         };
         if (typeof resource.ids === 'string') {
-            resource.ids = resource.ids.split(',').map((elem) => elem.trim());
+            resource.ids = resource.ids.split(',').map(elem => elem.trim());
         }
         resource.type = MetadataRouter.getResourceTypeByPath(ctx.path);
         const filter = {};
@@ -139,7 +139,7 @@ class MetadataRouter {
 
     static async clone(ctx) {
         const resource = MetadataRouter.getResource(ctx.params);
-        const newDataset = ctx.request.body.newDataset;
+        const { newDataset } = ctx.request.body;
         logger.info(`Cloning metadata of ${resource.type}: ${resource.id} in ${newDataset}`);
         try {
             const user = ctx.request.body.loggedUser;
