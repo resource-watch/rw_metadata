@@ -1,17 +1,3 @@
-function isArray(element) {
-    if (element instanceof Array) {
-        return true;
-    }
-    return false;
-}
-
-function isObject(property) {
-    if (property instanceof Object && property.length === undefined) {
-        return true;
-    }
-    return false;
-}
-
 function deserializeDataset(response) {
     // if (isArray(response.body.data)) {
     //     return response.body.data.map(el => el.attributes);
@@ -42,4 +28,4 @@ function validateMetadata(actual, expected) {
 module.exports = {
     deserializeDataset,
     validateMetadata
-}
+};

@@ -1,7 +1,10 @@
-const { ROLES, DATASET_METADATA_ONE, DATASET_METADATA_TWO, DATASET_METADATA_ONE_RESPONSE_MOCK, DATASET_METADATA_TWO_RESPONSE_MOCK } = require('./test.constants');
+/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const Metadata = require('models/metadata.model');
+const {
+    ROLES, DATASET_METADATA_ONE, DATASET_METADATA_TWO
+} = require('./test.constants');
 
 const should = chai.should();
 

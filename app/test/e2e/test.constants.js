@@ -135,7 +135,7 @@ const DATASET_METADATA_ONE_RESPONSE_MOCK = {
             updatedAt: '2018-05-14T13:51:53.455Z'
         }
     }
-}
+};
 
 const DATASET_METADATA_TWO_RESPONSE_MOCK = {
     data: {
@@ -183,4 +183,4 @@ module.exports = {
     DATASET_METADATA_TWO,
     DATASET_METADATA_ONE_RESPONSE_MOCK,
     DATASET_METADATA_TWO_RESPONSE_MOCK
-}
+};

@@ -1,9 +1,13 @@
+/* eslint-disable no-unused-vars */
 const nock = require('nock');
-const { ROLES, DATASET_METADATA_ONE, DATASET_METADATA_TWO, DATASET_METADATA_ONE_RESPONSE_MOCK, DATASET_METADATA_TWO_RESPONSE_MOCK } = require('./test.constants');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiDatetime = require('chai-datetime');
+
 const should = chai.should();
+const {
+    ROLES, DATASET_METADATA_ONE, DATASET_METADATA_TWO, DATASET_METADATA_ONE_RESPONSE_MOCK, DATASET_METADATA_TWO_RESPONSE_MOCK
+} = require('./test.constants');
 const { validateMetadata, deserializeDataset } = require('./helpers');
 
 let requester;
