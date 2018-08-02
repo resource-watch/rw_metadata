@@ -51,7 +51,7 @@ module.exports = (grunt) => {
             e2e: {
                 options: {
                     reporter: 'spec',
-                    timeout: 10000,
+                    timeout: 30000,
                     quiet: false, // Optionally suppress output to standard out (defaults to false)
                     clearRequireCache: true, // Optionally clear the require cache before running tests (defaults to false)
                 },

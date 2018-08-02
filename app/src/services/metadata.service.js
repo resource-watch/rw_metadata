@@ -1,13 +1,13 @@
-
 const logger = require('logger');
 const Metadata = require('models/metadata.model');
 const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
+const InvalidSortParameter = require('errors/invalidSortParameter.error');
 
 class MetadataService {
 
     static getFilter(filter) {
-        const finalFilter = {};
+        let finalFilter = {};
         if (filter && filter.application) {
             finalFilter.application = { $in: filter.application.split(',') };
         }
@@ -15,8 +15,21 @@ class MetadataService {
             finalFilter.language = { $in: filter.language.split(',') };
         }
         if (filter && filter.search && filter.search.length > 0) {
-            finalFilter.name = new RegExp(filter.search.join('|'), 'i');
-            finalFilter.description = new RegExp(filter.search.join('|'), 'i');
+            const tempFilter = {
+                $and: [
+                    { $text: { $search: filter.search.join(' ') } }
+                ]
+            };
+            if (Object.keys(finalFilter).length > 0) {
+                tempFilter.$and.push({
+                    $and: Object.keys(finalFilter).map((key) => {
+                        const q = {};
+                        q[key] = finalFilter[key];
+                        return q;
+                    }) || []
+                });
+            }
+            finalFilter = tempFilter;
         }
         return finalFilter;
     }
@@ -119,43 +132,43 @@ class MetadataService {
     }
 
     static async getAll(filter, extendedFilter) {
-        let finalFilter = MetadataService.getFilter(filter);
+        const finalFilter = MetadataService.getFilter(filter);
+        let projection = null;
         const options = {};
         if (filter.sort) {
             options.sort = {};
             filter.sort.split(',').forEach((el) => {
-                let sign = el.slice(0, 1);
-                let key = el.slice(1);
-                if (sign !== '-') {
+                let [sign] = el;
+                let key = el;
+                if (sign === '-' || sign === '+') {
+                    key = el.slice(1);
+                } else {
                     sign = '+';
-                    key = el;
                 }
-                options.sort[key] = sign === '+' ? 1 : -1;
+
+                if (key === 'relevance') {
+                    if (el === '+relevance') {
+                        throw new InvalidSortParameter('Sort by relevance ascending not supported');
+                    }
+                    projection = { score: { $meta: 'textScore' } };
+                    options.sort.score = { $meta: 'textScore' };
+                } else {
+                    options.sort[key] = sign === '+' ? 1 : -1;
+                }
             });
         }
         if (extendedFilter && extendedFilter.type) {
             finalFilter['resource.type'] = extendedFilter.type;
         }
-        if (filter && filter.search && filter.search.length > 0) {
-            const tempFilter = {
-                $and: [
-                    { $text: { $search: filter.search.join(' ') } }
-                ]
-            };
-            if (Object.keys(finalFilter).length > 0) {
-                tempFilter.$and.push({
-                    $and: Object.keys(finalFilter).map((key) => {
-                        const q = {};
-                        q[key] = finalFilter[key];
-                        return q;
-                    }) || []
-                });
-            }
-            finalFilter = tempFilter;
-        }
+
         const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        return Metadata.find(finalFilter, null, options).limit(limit).exec();
+        try {
+            const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
+            return result;
+        } catch (err) {
+            throw err;
+        }
     }
 
     static async getByIds(resource, filter) {
@@ -177,7 +190,10 @@ class MetadataService {
             throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
         }
         try {
-            return await MetadataService.createSome(user, metadatas, body.newDataset, { type: 'dataset', id: body.newDataset });
+            return await MetadataService.createSome(user, metadatas, body.newDataset, {
+                type: 'dataset',
+                id: body.newDataset
+            });
         } catch (err) {
             throw err;
         }

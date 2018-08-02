@@ -3,16 +3,18 @@ const nock = require('nock');
 const chai = require('chai');
 const Metadata = require('models/metadata.model');
 const {
-    ROLES, DATASET_METADATA_ONE, DATASET_METADATA_TWO
+    ROLES
 } = require('./test.constants');
 
 const should = chai.should();
 
-const { validateMetadata, deserializeDataset } = require('./helpers');
+const { validateMetadata, deserializeDataset, createMetadata } = require('./utils');
 const { getTestServer } = require('./test-server');
 
 const requester = getTestServer();
 
+let fakeMetadataOne = null;
+let fakeMetadataTwo = null;
 
 describe('EDIT METADATA:', () => {
 
@@ -21,51 +23,52 @@ describe('EDIT METADATA:', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
-        Metadata.remove({}).exec();
-
         nock.cleanAll();
+
+        fakeMetadataOne = createMetadata();
+        fakeMetadataTwo = createMetadata();
     });
 
     it('Create metadata for a dataset', async () => {
         const responseOne = await requester
-            .post(`/api/v1/dataset/${DATASET_METADATA_ONE.dataset}/metadata`)
-            .send(DATASET_METADATA_ONE);
+            .post(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
+            .send(Object.assign({}, fakeMetadataOne, { loggedUser: ROLES.ADMIN }));
         const createdDatasetOne = deserializeDataset(responseOne)[0];
 
         responseOne.status.should.equal(200);
         responseOne.body.should.have.property('data').and.be.a('array');
 
-        validateMetadata(createdDatasetOne, DATASET_METADATA_ONE);
+        validateMetadata(createdDatasetOne, fakeMetadataOne);
 
         const responseTwo = await requester
-            .post(`/api/v1/dataset/${DATASET_METADATA_TWO.dataset}/metadata`)
-            .send(DATASET_METADATA_TWO);
+            .post(`/api/v1/dataset/${fakeMetadataTwo.dataset}/metadata`)
+            .send(Object.assign({}, fakeMetadataTwo, { loggedUser: ROLES.ADMIN }));
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.have.property('data').and.be.a('array');
 
         const createdDatasetTwo = deserializeDataset(responseTwo)[0];
 
-        validateMetadata(createdDatasetTwo, DATASET_METADATA_TWO);
+        validateMetadata(createdDatasetTwo, fakeMetadataTwo);
     });
 
     it('Update metadata for a dataset', async () => {
         const response = await requester
-            .patch(`/api/v1/dataset/${DATASET_METADATA_ONE.dataset}/metadata`)
-            .send(DATASET_METADATA_TWO);
+            .patch(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
+            .send(Object.assign({}, fakeMetadataTwo, { loggedUser: ROLES.ADMIN }));
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array');
 
         const createdDataset = deserializeDataset(response)[0];
 
-        const updatedDatasetOne = Object.assign({}, DATASET_METADATA_TWO, { dataset: DATASET_METADATA_ONE.dataset });
+        const updatedDatasetOne = Object.assign({}, fakeMetadataTwo, { dataset: fakeMetadataOne.dataset });
         validateMetadata(createdDataset, updatedDatasetOne);
     });
 
     it('Delete metadata for a dataset', async () => {
         const responseOne = await requester
-            .delete(`/api/v1/dataset/${DATASET_METADATA_ONE.dataset}/metadata`)
+            .delete(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
             .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
             .send();
 
@@ -75,7 +78,7 @@ describe('EDIT METADATA:', () => {
         const loadedDatasetOne = deserializeDataset(responseOne)[0];
 
         const responseTwo = await requester
-            .delete(`/api/v1/dataset/${DATASET_METADATA_TWO.dataset}/metadata`)
+            .delete(`/api/v1/dataset/${fakeMetadataTwo.dataset}/metadata`)
             .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
             .send();
 
@@ -84,10 +87,10 @@ describe('EDIT METADATA:', () => {
 
         const loadedDatasetTwo = deserializeDataset(responseTwo)[0];
 
-        const updatedDatasetOne = Object.assign({}, DATASET_METADATA_TWO, { dataset: DATASET_METADATA_ONE.dataset });
+        const updatedDatasetOne = Object.assign({}, fakeMetadataTwo, { dataset: fakeMetadataOne.dataset });
 
         validateMetadata(loadedDatasetOne, updatedDatasetOne);
-        validateMetadata(loadedDatasetTwo, DATASET_METADATA_TWO);
+        validateMetadata(loadedDatasetTwo, fakeMetadataTwo);
     });
 
     afterEach(() => {

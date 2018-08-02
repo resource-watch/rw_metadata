@@ -7,6 +7,7 @@ const MetadataValidator = require('validators/metadata.validator');
 const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
 const MetadataNotValid = require('errors/metadataNotValid.error');
+const InvalidSortParameter = require('errors/invalidSortParameter.error');
 const CloneNotValid = require('errors/cloneNotValid.error');
 const { USER_ROLES } = require('app.constants');
 
@@ -112,9 +113,17 @@ class MetadataRouter {
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
         if (ctx.query.type) { extendedFilter.type = ctx.query.type; }
         if (ctx.query.sort) { filter.sort = ctx.query.sort; }
-        const result = await MetadataService.getAll(filter, extendedFilter);
-        ctx.set('cache', `metadata`);
-        ctx.body = MetadataSerializer.serialize(result);
+        try {
+            const result = await MetadataService.getAll(filter, extendedFilter);
+            ctx.set('cache', `metadata`);
+            ctx.body = MetadataSerializer.serialize(result);
+        } catch (err) {
+            if (err instanceof InvalidSortParameter) {
+                ctx.throw(400, err.message);
+                return;
+            }
+            throw err;
+        }
     }
 
     static async getByIds(ctx) {

@@ -16,8 +16,8 @@ const Metadata = new Schema({
     },
     userId: { type: String, required: true, trim: true },
     language: { type: String, required: true, trim: true },
-    name: { type: String, required: false, trim: true },
-    description: { type: String, required: false, trim: true },
+    name: { type: String, required: false, trim: true, index: true },
+    description: { type: String, required: false, trim: true, index: true },
     source: { type: String, required: false, trim: true },
     citation: { type: String, required: false, trim: true },
     license: { type: String, required: false, trim: true },
@@ -28,6 +28,27 @@ const Metadata = new Schema({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     status: { type: String, enum: STATUS, default: 'published' }
+});
+
+Metadata.index(
+    {
+        name: 'text',
+        description: 'text',
+    }, {
+        name: 'TextIndex',
+        default_language: 'english',
+        language_override: 'none',
+        weights:
+            {
+                name: 2,
+                description: 1
+            }
+    }
+);
+
+Metadata.on('index', (error) => {
+    // "_id index cannot be sparse"
+    console.log(error.message);
 });
 
 module.exports = mongoose.model('Metadata', Metadata);

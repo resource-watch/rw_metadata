@@ -53,6 +53,7 @@
     "koa-router": "7.4.0",
     "koa-validate": "1.0.7",
     "lodash": "4.17.10",
+    "migrate-mongoose": "^3.2.2",
     "mongoose": "5.2.4"
   },
   "devDependencies": {

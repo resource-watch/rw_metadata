@@ -1,9 +1,6 @@
+const { ROLES } = require('./test.constants');
+
 function deserializeDataset(response) {
-    // if (isArray(response.body.data)) {
-    //     return response.body.data.map(el => el.attributes);
-    // } else if (isObject(response.body.data)) {
-    //     return response.body.data.attributes;
-    // }
     return response.body.data;
 }
 
@@ -25,7 +22,45 @@ function validateMetadata(actual, expected) {
     new Date(actual.attributes.updatedAt).should.beforeTime(new Date());
 }
 
+const getUUID = () => Math.random().toString(36).substring(7);
+
+const createMetadata = () => {
+    const uuid = getUUID();
+
+    return {
+        dataset: uuid,
+        application: 'rw',
+        resource: {
+            id: uuid,
+            type: 'dataset'
+        },
+        userId: ROLES.ADMIN.id,
+        language: 'en',
+        name: `Fake metadata ${uuid} name`,
+        description: `Fake metadata ${uuid} description`,
+        source: `Fake source ${uuid}`,
+        citation: `Fake citation ${uuid}`,
+        license: `Fake license ${uuid}`,
+        info: {
+            too: 'par'
+        },
+        units: {
+            foo: 'bar'
+        },
+        columns: {
+            noo: 'zar'
+        },
+        applicationProperties: {
+            hoo: 'iar'
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'published'
+    };
+};
+
 module.exports = {
     deserializeDataset,
-    validateMetadata
+    validateMetadata,
+    createMetadata
 };
