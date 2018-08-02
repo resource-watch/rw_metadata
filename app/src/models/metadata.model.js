@@ -46,9 +46,4 @@ Metadata.index(
     }
 );
 
-Metadata.on('index', (error) => {
-    // "_id index cannot be sparse"
-    console.log(error.message);
-});
-
 module.exports = mongoose.model('Metadata', Metadata);
