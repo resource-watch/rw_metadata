@@ -76,10 +76,6 @@ module.exports = (grunt) => {
                 }
             },
         },
-        cover: {
-            cmd: false,
-            args: ['grunt', 'mocha:unit', '--gruntfile', 'app/Gruntfile.js', '--require', 'should']
-        },
         nyc: {
             cover: {
                 options: {
@@ -89,7 +85,6 @@ module.exports = (grunt) => {
                     reportDir: 'coverage',
                     all: true
                 },
-
                 cmd: false,
                 args: ['grunt', '--gruntfile', 'app/Gruntfile.js', 'mochaTest:e2e']
             }
