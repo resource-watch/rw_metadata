@@ -1,4 +1,3 @@
-
 module.exports = (grunt) => {
 
     grunt.file.setBase('..');
@@ -22,19 +21,6 @@ module.exports = (grunt) => {
                     node_env: 'test',
                     port: process.env.PORT,
                     output: 'started'
-                }
-            }
-        },
-
-        mocha_istanbul: {
-            coverage: {
-                src: 'app/test', // the folder, not the files
-                options: {
-                    coverageFolder: 'coverage',
-                    mask: '**/*.spec.js',
-                    root: 'app/src',
-                    nodeExec: require.resolve('.bin/babel-node'),
-                    mochaOptions: ['--compilers', 'js:babel-register']
                 }
             }
         },
@@ -89,7 +75,19 @@ module.exports = (grunt) => {
                     spawn: true
                 }
             },
-
+        },
+        nyc: {
+            cover: {
+                options: {
+                    include: ['app/src/**'],
+                    exclude: '*.test.*',
+                    reporter: ['lcov', 'text-summary'],
+                    reportDir: 'coverage',
+                    all: true
+                },
+                cmd: false,
+                args: ['grunt', '--gruntfile', 'app/Gruntfile.js', 'mochaTest:e2e']
+            }
         }
     });
 
@@ -98,7 +96,7 @@ module.exports = (grunt) => {
 
     grunt.registerTask('e2eTest', ['mochaTest:e2e']);
 
-    grunt.registerTask('e2eTestCoverage', ['mocha_istanbul:coverage']);
+    grunt.registerTask('e2eTestCoverage', ['mocha_nyc:coverage']);
 
     grunt.registerTask('e2eTest-watch', ['watch:e2eTest']);
 
@@ -107,5 +105,7 @@ module.exports = (grunt) => {
     grunt.registerTask('serve', ['express:dev', 'watch']);
 
     grunt.registerTask('default', 'serve');
+
+    grunt.loadNpmTasks('grunt-simple-nyc');
 
 };
