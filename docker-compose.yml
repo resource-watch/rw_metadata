@@ -9,5 +9,5 @@ prod:
   restart: always
   log_driver: "syslog"
   log_opt:
-      syslog-address: ${SYSLOG_ADDRESS}
-      tag: rw-metadata${STAGING}
+    syslog-address: ${SYSLOG_ADDRESS}
+    tag: rw-metadata${STAGING}
