@@ -2,7 +2,7 @@
 const logger = require('logger');
 const MetadataNotValid = require('errors/metadataNotValid.error');
 const CloneNotValid = require('errors/cloneNotValid.error');
-const METADATA_FIELDS = require('app.constants').METADATA_FIELDS;
+const { METADATA_FIELDS } = require('app.constants');
 
 class MetadataValidator {
 
@@ -38,21 +38,21 @@ class MetadataValidator {
         let isValid = false;
         switch (type) {
 
-        case 'string':
-            if (MetadataValidator.isString(field)) {
-                isValid = true;
-            } else {
-                isValid = false;
-            }
-            break;
-        default:
+            case 'string':
+                if (MetadataValidator.isString(field)) {
+                    isValid = true;
+                } else {
+                    isValid = false;
+                }
+                break;
+            default:
 
         }
         return isValid;
     }
 
     static checkApplicationProperties(applicationProperties, koaObj) {
-        const application = koaObj.request.body.application;
+        const { application } = koaObj.request.body;
         if (Object.keys(METADATA_FIELDS).indexOf(application) >= 0) {
             const requiredFields = Object.keys(METADATA_FIELDS[application]);
             const properties = applicationProperties;
@@ -98,7 +98,7 @@ class MetadataValidator {
         }, 'should be a valid object');
         if (koaObj.application) {
             koaObj.checkBody('applicationProperties').optional()
-            .check(applicationProperties => MetadataValidator.checkApplicationProperties(applicationProperties, koaObj), `Required fields - ${Object.keys(METADATA_FIELDS[koaObj.request.body.application])}`);
+                .check(applicationProperties => MetadataValidator.checkApplicationProperties(applicationProperties, koaObj), `Required fields - ${Object.keys(METADATA_FIELDS[koaObj.request.body.application])}`);
         }
         if (koaObj.errors) {
             logger.error('Error validating metadata creation');

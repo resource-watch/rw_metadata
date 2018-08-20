@@ -1,13 +1,13 @@
-
 const logger = require('logger');
 const Metadata = require('models/metadata.model');
 const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
+const InvalidSortParameter = require('errors/invalidSortParameter.error');
 
 class MetadataService {
 
     static getFilter(filter) {
-        const finalFilter = {};
+        let finalFilter = {};
         if (filter && filter.application) {
             finalFilter.application = { $in: filter.application.split(',') };
         }
@@ -15,8 +15,21 @@ class MetadataService {
             finalFilter.language = { $in: filter.language.split(',') };
         }
         if (filter && filter.search && filter.search.length > 0) {
-            finalFilter.name = new RegExp(filter.search.join('|'), 'i');
-            finalFilter.description = new RegExp(filter.search.join('|'), 'i');
+            const tempFilter = {
+                $and: [
+                    { $text: { $search: filter.search.join(' ') } }
+                ]
+            };
+            if (Object.keys(finalFilter).length > 0) {
+                tempFilter.$and.push({
+                    $and: Object.keys(finalFilter).map((key) => {
+                        const q = {};
+                        q[key] = finalFilter[key];
+                        return q;
+                    }) || []
+                });
+            }
+            finalFilter = tempFilter;
         }
         return finalFilter;
     }
@@ -28,9 +41,9 @@ class MetadataService {
             'resource.type': resource.type
         };
         const finalQuery = Object.assign(query, MetadataService.getFilter(filter));
-        const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
+        const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        return await Metadata.find(finalQuery).limit(limit).exec();
+        return Metadata.find(finalQuery).limit(limit).exec();
     }
 
     static async create(user, dataset, resource, body) {
@@ -63,14 +76,17 @@ class MetadataService {
             columns: body.columns,
             applicationProperties: body.applicationProperties
         });
-        return await metadata.save();
+        return metadata.save();
     }
 
     static async createSome(user, metadatas, dataset, resource) {
+        const results = [];
         for (let i = 0; i < metadatas.length; i++) {
-            await MetadataService.create(user, dataset, resource, metadatas[i]);
+            results.push(MetadataService.create(user, dataset, resource, metadatas[i]));
         }
-        return await MetadataService.get(dataset, resource, {});
+        await Promise.all(results);
+
+        return MetadataService.get(dataset, resource, {});
     }
 
     static async update(dataset, resource, body) {
@@ -95,7 +111,7 @@ class MetadataService {
         metadata.columns = body.columns ? body.columns : metadata.columns;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
         metadata.updatedAt = new Date();
-        return await metadata.save();
+        return metadata.save();
     }
 
     static async delete(dataset, resource, filter) {
@@ -116,34 +132,43 @@ class MetadataService {
     }
 
     static async getAll(filter, extendedFilter) {
-        let finalFilter = {};
-        if (filter && filter.application) {
-            finalFilter.application = { $in: filter.application.split(',') };
-        }
-        if (filter && filter.language) {
-            finalFilter.language = { $in: filter.language.split(',') };
+        const finalFilter = MetadataService.getFilter(filter);
+        let projection = null;
+        const options = {};
+        if (filter.sort) {
+            options.sort = {};
+            filter.sort.split(',').forEach((el) => {
+                let [sign] = el;
+                let key = el;
+                if (sign === '-' || sign === '+') {
+                    key = el.slice(1);
+                } else {
+                    sign = '+';
+                }
+
+                if (key === 'relevance') {
+                    if (el === '+relevance') {
+                        throw new InvalidSortParameter('Sort by relevance ascending not supported');
+                    }
+                    projection = { score: { $meta: 'textScore' } };
+                    options.sort.score = { $meta: 'textScore' };
+                } else {
+                    options.sort[key] = sign === '+' ? 1 : -1;
+                }
+            });
         }
         if (extendedFilter && extendedFilter.type) {
             finalFilter['resource.type'] = extendedFilter.type;
         }
-        if (filter && filter.search && filter.search.length > 0) {
-            const tempFilter = {
-                $and: [
-                    {$text: {$search: filter.search.join(' ') }}
-                ]
-            };
-            if (Object.keys(finalFilter).length > 0){
-                tempFilter.$and.push({ $and: Object.keys(finalFilter).map((key) => {
-                    const q = {};
-                    q[key] = finalFilter[key];
-                    return q;
-                }) || [] });
-            }
-            finalFilter = tempFilter;
-        }
-        const limit = (isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
+
+        const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        return await Metadata.find(finalFilter).limit(limit).exec();
+        try {
+            const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
+            return result;
+        } catch (err) {
+            throw err;
+        }
     }
 
     static async getByIds(resource, filter) {
@@ -154,7 +179,7 @@ class MetadataService {
         };
         const finalQuery = Object.assign(query, MetadataService.getFilter(filter));
         logger.debug('Getting metadata');
-        return await Metadata.find(finalQuery).exec();
+        return Metadata.find(finalQuery).exec();
     }
 
     static async clone(user, dataset, resource, body) {
@@ -165,7 +190,10 @@ class MetadataService {
             throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
         }
         try {
-            return await MetadataService.createSome(user, metadatas, body.newDataset, { type: 'dataset', id: body.newDataset });
+            return await MetadataService.createSome(user, metadatas, body.newDataset, {
+                type: 'dataset',
+                id: body.newDataset
+            });
         } catch (err) {
             throw err;
         }
