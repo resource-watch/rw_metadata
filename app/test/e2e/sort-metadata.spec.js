@@ -26,6 +26,8 @@ describe('Sort metadata', () => {
 
         nock.cleanAll();
 
+        Metadata.remove({}).exec();
+
         const metadataOne = createMetadata();
         const metadataTwo = createMetadata();
 

@@ -25,6 +25,8 @@ describe('EDIT METADATA:', () => {
 
         nock.cleanAll();
 
+        Metadata.remove({}).exec();
+
         fakeMetadataOne = createMetadata();
         fakeMetadataTwo = createMetadata();
     });
