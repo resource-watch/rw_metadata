@@ -1,0 +1,30 @@
+language: node_js
+services:
+- mongodb
+node_js:
+- "9.4"
+cache:
+  directories:
+  - "node_modules"
+env:
+  global:
+  - CC_TEST_REPORTER_ID=dee1235bba59531f55ff076cd4d76f51397caa245061d7dd870c0456fea7117e
+  - NODE_ENV=test
+  - PORT=5005
+  - API_VERSION=v1
+  - LOCAL_URL=http://127.0.0.1:5005
+  - CT_URL=http://127.0.0.1:9000
+  - CT_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
+  - CT_REGISTER_MODE=auto
+  - MONGO_PORT_27017_TCP_ADDR=127.0.0.1
+  - MONGO_PORT_27017_TCP_DATABASE=metadata_db_test
+
+before_script:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- ./cc-test-reporter before-build
+script:
+- npm test
+- npm run coverage
+after_script:
+- ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

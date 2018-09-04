@@ -26,6 +26,8 @@ describe('Search metadata', () => {
 
         nock.cleanAll();
 
+        Metadata.remove({}).exec();
+
         const metadataOne = createMetadata();
         const metadataTwo = createMetadata();
 
@@ -37,6 +39,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in multiple names should return multiple results', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?search=name&sort=createdAt`);
 
@@ -51,6 +56,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in a single name should return a single result', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?search=nameUniqueWord`);
 
@@ -63,6 +71,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in multiple descriptions should return multiple results', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?search=description&sort=createdAt`);
 
@@ -77,6 +88,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in a single description should return a single result', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?search=descriptionUniqueWord&sort=createdAt`);
 
@@ -89,8 +103,11 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in different fields of different results should prioritize results according to weight - test name weight > 2x description weight', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
-            .get(`/api/v1/metadata?search=keyword`);
+            .get(`/api/v1/metadata?search=keyword&sort=relevance`);
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array').with.lengthOf(2);
@@ -103,14 +120,20 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in different fields of different results should prioritize results according to weight - test name weight < 3x description weight', async () => {
+        let currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const metadataThree = createMetadata();
 
         metadataThree.description = `${metadataThree.description} keyword keyword keyword`;
 
         const fakeMetadataThree = await new Metadata(metadataThree).save();
 
+        currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(3);
+
         const response = await requester
-            .get(`/api/v1/metadata?search=keyword`);
+            .get(`/api/v1/metadata?search=keyword&sort=relevance`);
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array').with.lengthOf(3);
@@ -123,10 +146,13 @@ describe('Search metadata', () => {
         validateMetadata(loadedDatasetTwo, fakeMetadataOne);
         validateMetadata(loadedDatasetThree, fakeMetadataTwo);
 
-        Metadata.remove({ _id: fakeMetadataThree.id }).exec();
+        await Metadata.remove({ _id: fakeMetadataThree.id }).exec();
     });
 
     it('Search for metadata by keyword and sort by relevance non-specified should prioritize results according to weight - test name weight > 2x description weight', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?sort=relevance&search=keyword`);
 
@@ -141,6 +167,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword and sort by relevance descending should prioritize results according to weight - test name weight > 2x description weight', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?sort=${encodeURIComponent('-')}relevance&search=keyword`);
 
@@ -155,6 +184,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword and sort by relevance ascending should return an error', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?sort=${encodeURIComponent('+')}relevance&search=keyword`);
 
@@ -164,6 +196,9 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by multiple keywords uses the "OR" approach', async () => {
+        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const response = await requester
             .get(`/api/v1/metadata?search=nameUniqueWord%20descriptionUniqueWord&sort=+name`);
 
