@@ -1,5 +1,8 @@
 # Resource Watch Metadata Microservice
 
+[![Build Status](https://travis-ci.org/resource-watch/rw_metadata.svg?branch=master)](https://travis-ci.org/resource-watch/rw_metadata)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/93b1d3c022b33c438ce1/test_coverage)](https://codeclimate.com/github/resource-watch/rw_metadata/test_coverage)
+
 This repository implements the metadata services that are available in the Resource Watch API.
 
 If you are looking for the API Doc (Info and Usage) please go to the next link:
