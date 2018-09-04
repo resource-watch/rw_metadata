@@ -107,7 +107,7 @@ describe('Search metadata', () => {
         currentMetadata.should.be.a('array').with.lengthOf(2);
 
         const response = await requester
-            .get(`/api/v1/metadata?search=keyword`);
+            .get(`/api/v1/metadata?search=keyword&sort=relevance`);
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array').with.lengthOf(2);
@@ -120,17 +120,20 @@ describe('Search metadata', () => {
     });
 
     it('Search for metadata by keyword in different fields of different results should prioritize results according to weight - test name weight < 3x description weight', async () => {
+        let currentMetadata = await Metadata.find({}).exec();
+        currentMetadata.should.be.a('array').with.lengthOf(2);
+
         const metadataThree = createMetadata();
 
         metadataThree.description = `${metadataThree.description} keyword keyword keyword`;
 
         const fakeMetadataThree = await new Metadata(metadataThree).save();
 
-        const currentMetadata = await Metadata.find({}).exec();
+        currentMetadata = await Metadata.find({}).exec();
         currentMetadata.should.be.a('array').with.lengthOf(3);
 
         const response = await requester
-            .get(`/api/v1/metadata?search=keyword`);
+            .get(`/api/v1/metadata?search=keyword&sort=relevance`);
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array').with.lengthOf(3);
@@ -143,7 +146,7 @@ describe('Search metadata', () => {
         validateMetadata(loadedDatasetTwo, fakeMetadataOne);
         validateMetadata(loadedDatasetThree, fakeMetadataTwo);
 
-        Metadata.remove({ _id: fakeMetadataThree.id }).exec();
+        await Metadata.remove({ _id: fakeMetadataThree.id }).exec();
     });
 
     it('Search for metadata by keyword and sort by relevance non-specified should prioritize results according to weight - test name weight > 2x description weight', async () => {
