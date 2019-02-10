@@ -27,12 +27,12 @@ describe('Access metadata', () => {
         nock.cleanAll();
 
         Metadata.remove({}).exec();
-
-        fakeMetadataOne = await new Metadata(createMetadata()).save();
-        fakeMetadataTwo = await new Metadata(createMetadata()).save();
     });
 
     it('Get metadata for a single dataset', async () => {
+        fakeMetadataOne = await new Metadata(createMetadata()).save();
+        fakeMetadataTwo = await new Metadata(createMetadata()).save();
+
         const response = await requester
             .get(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`);
 
