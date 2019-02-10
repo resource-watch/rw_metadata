@@ -6,7 +6,7 @@ const config = require('config');
 const loader = require('loader');
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-const ctRegisterMicroservice = require('ct-register-microservice-node');
+const ctRegisterMicroservice = require('sd-ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
 const MigrateMongoose = require('migrate-mongoose');
 
