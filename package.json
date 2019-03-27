@@ -42,7 +42,6 @@
     "bunyan": "1.8.5",
     "co": "4.6.0",
     "config": "1.21.0",
-    "ct-register-microservice-node": "2.1.6",
     "jsonapi-serializer": "2.1.1",
     "kcors": "2.2.2",
     "koa": "2.5.2",
@@ -54,7 +53,8 @@
     "koa-validate": "1.0.7",
     "lodash": "4.17.10",
     "migrate-mongoose": "^3.2.2",
-    "mongoose": "5.2.4"
+    "mongoose": "^5.4.11",
+    "sd-ct-register-microservice-node": "^2.1.7"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
@@ -70,7 +70,6 @@
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-react": "7.10.0",
     "grunt": "^1.0.3",
-    "grunt-apidoc": "^0.11.0",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-jshint": "^1.1.0",
@@ -79,8 +78,6 @@
     "grunt-mocha-test": "^0.13.3",
     "grunt-notify": "^0.4.5",
     "grunt-simple-nyc": "^1.1.1",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.2.0",
     "load-grunt-tasks": "3.4.0",
     "mocha": "^5.2.0",
     "nock": "^9.4.2",

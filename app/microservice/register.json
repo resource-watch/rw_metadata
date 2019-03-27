@@ -115,21 +115,21 @@
         "method": "POST",
         "redirect": {
             "method": "POST",
-            "path": "/api/v1/dataset/metadata/get-by-ids/"
+            "path": "/api/v1/dataset/metadata/find-by-ids"
         }
     }, {
         "path": "/v1/dataset/:dataset/widget/metadata/find-by-ids",
         "method": "POST",
         "redirect": {
             "method": "POST",
-            "path": "/api/v1/dataset/:dataset/widget/metadata/get-by-ids"
+            "path": "/api/v1/dataset/:dataset/widget/metadata/find-by-ids"
         }
     }, {
         "path": "/v1/dataset/:dataset/layer/metadata/find-by-ids",
         "method": "POST",
         "redirect": {
             "method": "POST",
-            "path": "/api/v1/dataset/:dataset/layer/metadata/get-by-ids"
+            "path": "/api/v1/dataset/:dataset/layer/metadata/find-by-ids"
         }
     }]
 }

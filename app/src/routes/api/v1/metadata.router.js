@@ -126,9 +126,9 @@ class MetadataRouter {
         }
     }
 
-    static async getByIds(ctx) {
+    static async findByIds(ctx) {
         if (!ctx.request.body.ids) {
-            ctx.throw(400, 'Bad request');
+            ctx.throw(400, 'Bad request - Missing \'ids\' from request body');
             return;
         }
         logger.info(`Getting metadata by ids: ${ctx.request.body.ids}`);
@@ -252,9 +252,9 @@ router.patch('/dataset/:dataset/layer/:layer/metadata', validationMiddleware, au
 router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
 // generic
 router.get('/metadata', MetadataRouter.getAll);
-// get by id
-router.post('/dataset/metadata/get-by-ids', MetadataRouter.getByIds);
-router.post('/dataset/:dataset/widget/metadata/get-by-ids', MetadataRouter.getByIds);
-router.post('/dataset/:dataset/layer/metadata/get-by-ids', MetadataRouter.getByIds);
+// find by id
+router.post('/dataset/metadata/find-by-ids', MetadataRouter.findByIds);
+router.post('/dataset/:dataset/widget/metadata/find-by-ids', MetadataRouter.findByIds);
+router.post('/dataset/:dataset/layer/metadata/find-by-ids', MetadataRouter.findByIds);
 
 module.exports = router;
