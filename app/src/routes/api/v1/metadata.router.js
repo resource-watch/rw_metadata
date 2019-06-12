@@ -180,7 +180,7 @@ const authorizationMiddleware = async (ctx, next) => {
         ctx.throw(400, 'Bad request');
         return;
     }
-    
+
     if (!user || USER_ROLES.indexOf(user.role) === -1) {
         ctx.throw(401, 'Unauthorized'); // if not logged or invalid ROLE-> out
         return;
