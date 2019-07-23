@@ -15,8 +15,7 @@ const helpers = initHelpers(
     requester,
     `${prefix}/${DEFAULT.datasetID}/widget/${DEFAULT.widgetID}/metadata`,
     'patch',
-    createMetadataResourceForUpdate('widget'),
-);
+    createMetadataResourceForUpdate('widget'));
 
 const updateWidget = (data = createMetadataResourceForUpdate('widget'), datasetID = DEFAULT.datasetID) => requester
     .patch(`${prefix}/${datasetID}/widget/${data.resource.id}/metadata`)
