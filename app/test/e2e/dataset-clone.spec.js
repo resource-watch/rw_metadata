@@ -10,8 +10,7 @@ const helpers = initHelpers(
     requester,
     `${prefix}/123/metadata/clone`,
     'post',
-    { newDataset: 'test123' },
-);
+    { newDataset: 'test123' });
 
 describe('DATASET CLONE endpint', () => {
     before(async () => {
