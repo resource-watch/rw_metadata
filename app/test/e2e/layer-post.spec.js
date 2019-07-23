@@ -22,7 +22,7 @@ const createLayer = (data = createMetadataResource('layer')) => {
 
     return requester
         .post(`${prefix}/${datasetID}/layer/${widgetID}/metadata`)
-        .send({ ...data, loggedUser: ROLES.ADMIN });
+        .send(Object.assign({}, data, { loggedUser: ROLES.ADMIN }));
 };
 
 describe('METADATA LAYER POST endpoint', () => {
@@ -45,7 +45,7 @@ describe('METADATA LAYER POST endpoint', () => {
     it('create layer metadata with wrong data, should return error which specified in constant', async () => {
         await Promise.all(WIDGET_WRONG_DATAS.map(async ({ data, expectedError }) => {
             const defaultMetadata = createMetadataResource('layer');
-            const layer = await createLayer({ ...defaultMetadata, ...data });
+            const layer = await createLayer(Object.assign({}, defaultMetadata, data));
             layer.status.should.equal(400);
             ensureCorrectError(layer.body, expectedError);
         }));
@@ -55,7 +55,7 @@ describe('METADATA LAYER POST endpoint', () => {
         const defaultWidget = createMetadataResource('layer');
         const layer = await createLayer(defaultWidget);
 
-        validateMetadata(layer.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
+        validateMetadata(layer.body.data[0], Object.assign({}, defaultWidget, { dataset: DEFAULT.datasetID }));
     });
 
     afterEach(() => {
