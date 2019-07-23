@@ -22,9 +22,42 @@ function validateMetadata(actual, expected) {
     new Date(actual.attributes.updatedAt).should.beforeTime(new Date());
 }
 
+const ensureCorrectError = (body, errMessage) => {
+    body.should.have.property('errors').and.be.an('array');
+    body.errors[0].should.have.property('detail').and.equal(errMessage);
+};
+
 const getUUID = () => Math.random().toString(36).substring(7);
 
-const createMetadata = () => {
+const initHelpers = (requester, url, initMethod, initialData = {}, queryParams = '?language=en') => {
+    const isUserForbidden = (method = initMethod) => async () => {
+        const response = await requester[method](`${url + queryParams}&loggedUser=${JSON.stringify(ROLES.USER)}`)
+            .send(initialData);
+        response.status.should.equal(403);
+        ensureCorrectError(response.body, 'Forbidden');
+    };
+
+    const isRightAppRequired = (method = initMethod) => async () => {
+        const response = await requester[method](`${url}?language=en&application=test123&loggedUser=${JSON.stringify(ROLES.USER)}`)
+            .send(initialData);
+        response.status.should.equal(403);
+        ensureCorrectError(response.body, 'Forbidden');
+    };
+
+    const isTokenRequired = (method = initMethod) => async () => {
+        const response = await requester[method](url + queryParams).send(initialData);
+        response.status.should.equal(401);
+        ensureCorrectError(response.body, 'Unauthorized');
+    };
+
+    return {
+        isRightAppRequired,
+        isUserForbidden,
+        isTokenRequired,
+    };
+};
+
+const createMetadata = (type) => {
     const uuid = getUUID();
 
     return {
@@ -32,7 +65,7 @@ const createMetadata = () => {
         application: 'rw',
         resource: {
             id: uuid,
-            type: 'dataset'
+            type: type || 'dataset'
         },
         userId: ROLES.ADMIN.id,
         language: 'en',
@@ -62,5 +95,8 @@ const createMetadata = () => {
 module.exports = {
     deserializeDataset,
     validateMetadata,
-    createMetadata
+    createMetadata,
+    initHelpers,
+    getUUID,
+    ensureCorrectError
 };
