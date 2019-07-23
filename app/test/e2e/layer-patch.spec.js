@@ -15,8 +15,7 @@ const helpers = initHelpers(
     requester,
     `${prefix}/${DEFAULT.datasetID}/layer/${DEFAULT.widgetID}/metadata`,
     'patch',
-    createMetadataResourceForUpdate('layer'),
-);
+    createMetadataResourceForUpdate('layer'));
 
 const updateLayer = (data = createMetadataResourceForUpdate('layer'), datasetID = DEFAULT.datasetID) => requester
     .patch(`${prefix}/${datasetID}/layer/${data.resource.id}/metadata`)

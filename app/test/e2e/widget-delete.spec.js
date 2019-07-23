@@ -16,8 +16,7 @@ const helpers = initHelpers(
     `${prefix}/${DEFAULT.datasetID}/widget/${DEFAULT.widgetID}/metadata`,
     'delete',
     {},
-    '?language=en&application=rw'
-);
+    '?language=en&application=rw');
 
 describe('METADATA WIDGET DELETE endpoint', () => {
     before(async () => {
