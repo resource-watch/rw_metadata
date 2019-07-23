@@ -52,7 +52,77 @@ const ROLES = {
     }
 };
 
+const WIDGET_WRONG_DATAS = [
+    { expectedError: '- language: language check failed. - ', data: { language: 123 } },
+    { expectedError: '- application: application check failed. - ', data: { application: {} } },
+    { expectedError: '- description: should be a valid string - ', data: { description: 123 } },
+    { expectedError: '- name: should be a valid string - ', data: { name: {} } },
+    { expectedError: '- source: should be a valid string - ', data: { source: 123 } },
+    { expectedError: '- citation: should be a valid string - ', data: { citation: 123 } },
+    { expectedError: '- license: should be a valid string - ', data: { license: 123 } },
+    { expectedError: '- units: should be a valid object - ', data: { units: [] } },
+    { expectedError: '- columns: should be a valid object - ', data: { columns: [] } },
+];
+
+const createMetadataResource = (type, resourceID = Math.random().toString(36).substring(7)) => ({
+    application: 'rw',
+    resource: {
+        id: resourceID,
+        type
+    },
+    userId: ROLES.ADMIN.id,
+    language: 'en',
+    name: `Fake metadata name`,
+    description: `Fake metadata ${resourceID} description`,
+    source: `Fake source ${resourceID}`,
+    citation: `Fake citation ${resourceID}`,
+    license: `Fake license ${resourceID}`,
+    info: {
+        too: 'par'
+    },
+    units: {
+        foo: 'bar'
+    },
+    columns: {
+        noo: 'zar'
+    },
+    applicationProperties: {
+        hoo: 'iar'
+    },
+    status: 'published'
+});
+
+const createMetadataResourceForUpdate = (type, resourceID = Math.random().toString(36).substring(7)) => ({
+    application: 'rw',
+    resource: {
+        id: resourceID,
+        type
+    },
+    userId: ROLES.ADMIN.id,
+    language: 'en',
+    name: `Fake metadata name update`,
+    description: `Fake metadata ${resourceID} description update`,
+    source: `Fake source ${resourceID} update`,
+    citation: `Fake citation ${resourceID} update`,
+    license: `Fake license ${resourceID} update`,
+    info: {
+        too: 'par update'
+    },
+    units: {
+        foo: 'bar update'
+    },
+    columns: {
+        noo: 'zar update'
+    },
+    applicationProperties: {
+        hoo: 'iar update'
+    },
+    status: 'published'
+});
 
 module.exports = {
-    ROLES
+    ROLES,
+    createMetadataResource,
+    createMetadataResourceForUpdate,
+    WIDGET_WRONG_DATAS,
 };
