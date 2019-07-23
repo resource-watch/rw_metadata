@@ -12,7 +12,7 @@
   },
   "mongodb": {
     "database": "metadata_db",
-    "host": "http://mymachine",
+    "host": "mymachine",
     "port": 27017
   },
   "appSettings": {

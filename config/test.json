@@ -11,7 +11,7 @@
 
     "mongodb":{
         "database": "metadata_db_test",
-        "host": "http://mymachine",
+        "host": "mymachine",
         "port": 27017
     }
 }
