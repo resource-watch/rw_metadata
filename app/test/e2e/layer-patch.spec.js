@@ -19,7 +19,7 @@ const helpers = initHelpers(
 
 const updateLayer = (data = createMetadataResourceForUpdate('layer'), datasetID = DEFAULT.datasetID) => requester
     .patch(`${prefix}/${datasetID}/layer/${data.resource.id}/metadata`)
-    .send({ ...data, loggedUser: ROLES.ADMIN });
+    .send(Object.assign({}, data, { loggedUser: ROLES.ADMIN }));
 
 describe('METADATA LAYER PATCH endpoint', () => {
     before(async () => {
@@ -41,7 +41,7 @@ describe('METADATA LAYER PATCH endpoint', () => {
     it('update layer metadata with wrong data, should return error which specified in constant', async () => {
         await Promise.all(WIDGET_WRONG_DATAS.map(async ({ data, expectedError }) => {
             const defaultMetadata = createMetadataResourceForUpdate('layer');
-            const layer = await updateLayer({ ...defaultMetadata, ...data });
+            const layer = await updateLayer(Object.assign({}, defaultMetadata, data));
             layer.status.should.equal(400);
             ensureCorrectError(layer.body, expectedError);
         }));
@@ -51,7 +51,7 @@ describe('METADATA LAYER PATCH endpoint', () => {
         const metadata = await new Metadata(createMetadata('layer')).save();
         const defaultWidget = createMetadataResourceForUpdate('layer', metadata.resource.id);
         const layer = await updateLayer(defaultWidget, metadata.dataset);
-        validateMetadata(layer.body.data[0], { ...defaultWidget, dataset: metadata.dataset });
+        validateMetadata(layer.body.data[0], Object.assign({}, defaultWidget, { dataset: metadata.dataset }));
     });
 
     afterEach(() => {
