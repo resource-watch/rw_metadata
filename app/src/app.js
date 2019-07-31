@@ -5,10 +5,8 @@ const koaValidate = require('koa-validate');
 const config = require('config');
 const loader = require('loader');
 const mongoose = require('mongoose');
-mongoose.Promise = require('bluebird');
 const ctRegisterMicroservice = require('sd-ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
-const MigrateMongoose = require('migrate-mongoose');
 
 const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
@@ -20,51 +18,23 @@ const koaBody = require('koa-body')({
 });
 
 const onDbReady = (err) => {
-    logger.info('Connected to MongoDB at ', mongoUri);
     if (err) {
-        logger.error(err);
-        throw new Error(err);
-    }
-};
-
-mongoose.connect(mongoUri, onDbReady);
-
-const connectToMongoDB = async () => {
-    const migrator = new MigrateMongoose({
-        migrationsPath: `${__dirname}/migrations`, // Path to migrations directory
-        dbConnectionUri: mongoUri, // mongo url
-        es6Templates: true, // Should migrations be assumed to be using ES6?
-        collectionName: 'migrations', // collection name to use for migrations (defaults to 'migrations')
-        autosync: true // if making a CLI app, set this to false to prompt the user, otherwise true
-    });
-
-    const list = await migrator.list();
-
-    const pendingMigrations = list.filter(e => (e.state === 'down'));
-
-    pendingMigrations.forEach(async (migration) => {
-        logger.info(`MIGRATIONS: Mongoose update ${migration.name} pending execution`);
-
-        try {
-            await migrator.run('up', migration.name);
-            logger.info(`MIGRATIONS: Mongoose update ${migration.name} ran successfully`);
-        } catch (err) {
-            logger.error(`MIGRATIONS: Mongoose update ${migration.name} failed with result: ${err}`);
-        }
-    });
-
-    const onDbReady = (err) => {
-        logger.info('Connected to MongoDB at ', mongoUri);
-        if (err) {
+        if (retries >= 0) {
+            retries--;
+            logger.error(`Failed to connect to MongoDB uri ${mongoUri} with error message "${err.message}", retrying...`);
+            sleep.sleep(5);
+            mongoose.connect(mongoUri, onDbReady);
+        } else {
+            logger.error('MongoURI', mongoUri);
             logger.error(err);
             throw new Error(err);
         }
-    };
-
-    mongoose.connect(mongoUri, onDbReady);
+    }
 };
 
-connectToMongoDB();
+
+mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
+
 
 const app = new Koa();
 
