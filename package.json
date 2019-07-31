@@ -5,17 +5,31 @@
   "main": "index.js",
   "scripts": {
     "coverage": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc",
-    "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
+    "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js test",
     "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index.js",
     "eslint": "eslint 'app/**/*.js' --fix",
     "precommit": "lint-staged"
   },
-  "lint-staged": {
-    "*.js": [
-      "eslint 'app/**/*.js' --fix",
-      "git add"
-    ]
+  "author": {
+    "name": "Vizzuality",
+    "email": "hello@vizzuality.com",
+    "url": "http://vizzuality.com/"
   },
+  "contributors": [
+    {
+      "name": "Raul Requero"
+    },
+    {
+      "name": "Sergio Gordillo"
+    },
+    {
+      "name": "Enrique Cornejo"
+    },
+    {
+      "name": "Tiago Garcia",
+      "url": "https://github.com/tiagojsag"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/resource-watch/rw_metadata.git"
@@ -27,10 +41,6 @@
     "node",
     "javascript",
     "koa"
-  ],
-  "contributors": [
-    "sgordillo",
-    "rrequero"
   ],
   "license": "MIT",
   "bugs": {
@@ -51,36 +61,31 @@
     "koa-mount": "2.0.0",
     "koa-router": "7.4.0",
     "koa-validate": "1.0.7",
-    "lodash": "4.17.10",
-    "migrate-mongoose": "^3.2.2",
+    "lodash": "^4.17.15",
     "mongoose": "^5.4.11",
     "sd-ct-register-microservice-node": "^2.1.7"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-eslint": "8.2.6",
-    "babel-plugin-istanbul": "^4.1.6",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-register": "6.26.0",
+    "babel-cli": "^6.26.0",
     "chai-datetime": "^1.5.0",
-    "chai-http": "^4.0.0",
-    "eslint": "5.2.0",
-    "eslint-config-airbnb": "17.0.0",
-    "eslint-plugin-import": "2.13.0",
-    "eslint-plugin-jsx-a11y": "6.1.1",
-    "eslint-plugin-react": "7.10.0",
-    "grunt": "^1.0.3",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-jshint": "^1.1.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb": "^17.1.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "grunt": "^1.0.4",
+    "grunt-cli": "^1.3.2",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-jshint": "^2.1.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-express-server": "^0.5.4",
     "grunt-mocha-test": "^0.13.3",
     "grunt-notify": "^0.4.5",
-    "grunt-simple-nyc": "^1.1.1",
-    "load-grunt-tasks": "3.4.0",
-    "mocha": "^5.2.0",
-    "nock": "^9.4.2",
-    "nyc": "^12.0.2"
+    "grunt-simple-nyc": "^3.0.0",
+    "load-grunt-tasks": "^5.0.0",
+    "mocha": "^6.2.0",
+    "nock": "^10.0.6",
+    "nyc": "^14.1.1"
   }
 }

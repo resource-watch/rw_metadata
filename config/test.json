@@ -1,17 +1,16 @@
 {
-    "logger": {
-        "name": "metadata-TEST",
-        "level": "debug",
-        "toFile": false,
-        "dirLogFile": null
-    },
-    "service": {
-        "uri": "http://mymachine:5000"
-    },
-
-    "mongodb":{
-        "database": "metadata_db_test",
-        "host": "mymachine",
-        "port": 27017
-    }
+  "logger": {
+    "name": "metadata-TEST",
+    "level": "debug",
+    "toFile": false,
+    "dirLogFile": null
+  },
+  "service": {
+    "uri": "http://mymachine:5000"
+  },
+  "mongodb": {
+    "database": "metadata_db_test",
+    "host": "mymachine",
+    "port": 27017
+  }
 }
