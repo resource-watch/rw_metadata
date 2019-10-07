@@ -112,9 +112,27 @@ describe('Find metadatas by IDs', () => {
         validateMetadata(loadedDatasetTwo, metadataTwo);
     });
 
-    it('Find metadatas with id list containing metadatas that exist returns the listed metadatas', async () => {
+    it('Find metadatas with id list containing metadatas that exist returns the metadatas requested on the body, ignoring the \'ids\' query param', async () => {
         const response = await requester
             .post(`/api/v1/dataset/metadata/find-by-ids?ids=${metadataTwo.dataset}`)
+            .send({
+                ids: [metadataOne.dataset]
+            });
+
+        response.status.should.equal(200);
+        response.body.should.have.property('data').and.be.an('array').and.length(1);
+
+        const loadedDatasetOne = deserializeDataset(response)[0];
+        const loadedDatasetTwo = deserializeDataset(response)[1];
+
+        loadedDatasetOne.should.have.property('attributes');
+
+        validateMetadata(loadedDatasetOne, metadataOne);
+    });
+
+    it('Find metadatas with id list containing metadatas that exist returns the metadatas requested on the body, ignoring the \'user.role\' query param', async () => {
+        const response = await requester
+            .post(`/api/v1/dataset/metadata/find-by-ids?user.role=FAKE`)
             .send({
                 ids: [metadataOne.dataset]
             });
