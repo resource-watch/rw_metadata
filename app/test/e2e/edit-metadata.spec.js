@@ -15,6 +15,7 @@ const requester = getTestServer();
 
 let fakeMetadataOne = null;
 let fakeMetadataTwo = null;
+let fakeMetadataThree = null;
 
 describe('EDIT METADATA:', () => {
 
@@ -29,29 +30,23 @@ describe('EDIT METADATA:', () => {
 
         fakeMetadataOne = createMetadata();
         fakeMetadataTwo = createMetadata();
+        fakeMetadataThree = createMetadata();
     });
 
     it('Create metadata for a dataset', async () => {
-        const responseOne = await requester
-            .post(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
-            .send(Object.assign({}, fakeMetadataOne, { loggedUser: ROLES.ADMIN }));
-        const createdDatasetOne = deserializeDataset(responseOne)[0];
+        const metadatas = [fakeMetadataOne, fakeMetadataTwo, fakeMetadataThree];
 
-        responseOne.status.should.equal(200);
-        responseOne.body.should.have.property('data').and.be.a('array');
+        for (const metadata of metadatas) {
+            const response = await requester
+                .post(`/api/v1/dataset/${metadata.dataset}/metadata`)
+                .send(Object.assign({}, metadata, { loggedUser: ROLES.ADMIN }));
+            const createdDataset = deserializeDataset(response)[0];
 
-        validateMetadata(createdDatasetOne, fakeMetadataOne);
+            response.status.should.equal(200);
+            response.body.should.have.property('data').and.be.a('array');
 
-        const responseTwo = await requester
-            .post(`/api/v1/dataset/${fakeMetadataTwo.dataset}/metadata`)
-            .send(Object.assign({}, fakeMetadataTwo, { loggedUser: ROLES.ADMIN }));
-
-        responseTwo.status.should.equal(200);
-        responseTwo.body.should.have.property('data').and.be.a('array');
-
-        const createdDatasetTwo = deserializeDataset(responseTwo)[0];
-
-        validateMetadata(createdDatasetTwo, fakeMetadataTwo);
+            validateMetadata(createdDataset, metadata);
+        }
     });
 
     it('Update metadata for a dataset', async () => {
@@ -66,6 +61,35 @@ describe('EDIT METADATA:', () => {
 
         const updatedDatasetOne = Object.assign({}, fakeMetadataTwo, { dataset: fakeMetadataOne.dataset });
         validateMetadata(createdDataset, updatedDatasetOne);
+
+
+        // Below we test if the user can empty the string fields correctly
+        {
+            const fieldsToTest = ['description', 'source', 'citation', 'license'];
+
+            const body = Object.assign(
+                {},
+                fakeMetadataThree,
+                fieldsToTest.reduce((res, field) => Object.assign({}, res, { [field]: '' }), {}),
+                { loggedUser: ROLES.ADMIN }
+            );
+
+            const response = await requester
+                .patch(`/api/v1/dataset/${fakeMetadataThree.dataset}/metadata`)
+                .send(body);
+
+            response.status.should.equal(200);
+            response.body.should.have.property('data').and.be.a('array');
+
+            const actual = deserializeDataset(response)[0];
+            const expected = Object.assign(
+                {},
+                fakeMetadataThree,
+                fieldsToTest.reduce((res, field) => Object.assign({}, res, { [field]: '' }), {})
+            );
+
+            validateMetadata(actual, expected);
+        }
     });
 
     it('Delete metadata for a dataset', async () => {
