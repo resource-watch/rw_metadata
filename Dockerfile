@@ -2,7 +2,7 @@ FROM node:12.11-alpine
 MAINTAINER info@vizzuality.com
 
 ENV NAME rw-metadata
-ENV USER microservice
+ENV USER rw-metadata
 
 RUN apk update && apk upgrade && \
     apk add --no-cache --update bash git openssh python alpine-sdk
