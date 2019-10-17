@@ -1,4 +1,5 @@
 const logger = require('logger');
+const isNil = require('lodash/isNil');
 const Metadata = require('models/metadata.model');
 const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
@@ -102,14 +103,12 @@ class MetadataService {
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
         }
 
-        const hasValue = value => value !== undefined && value !== null;
-
         logger.debug('Updating metadata');
         metadata.name = body.name ? body.name : metadata.name;
-        metadata.description = hasValue(body.description) ? body.description : metadata.description;
-        metadata.source = hasValue(body.source) ? body.source : metadata.source;
-        metadata.citation = hasValue(body.citation) ? body.citation : metadata.citation;
-        metadata.license = hasValue(body.license) ? body.license : metadata.license;
+        metadata.description = !isNil(body.description) ? body.description : metadata.description;
+        metadata.source = !isNil(body.source) ? body.source : metadata.source;
+        metadata.citation = !isNil(body.citation) ? body.citation : metadata.citation;
+        metadata.license = !isNil(body.license) ? body.license : metadata.license;
         metadata.info = body.info ? body.info : metadata.info;
         metadata.columns = body.columns ? body.columns : metadata.columns;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
