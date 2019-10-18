@@ -20,6 +20,6 @@ services:
 
   mongo:
     image: mongo:3.4
-    container_name: rw-metadata-mongo-test
+    command: --smallfiles
     ports:
       - "27017"
