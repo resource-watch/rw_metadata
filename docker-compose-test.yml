@@ -6,7 +6,6 @@ services:
     environment:
       CT_REGISTER_MODE: auto
       NODE_ENV: test
-      DEBUG: "*"
       PORT: 5005
       API_VERSION: v1
       LOCAL_URL: http://127.0.0.1:5005
