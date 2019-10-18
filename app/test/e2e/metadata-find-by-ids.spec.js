@@ -61,17 +61,6 @@ describe('Find metadatas by IDs', () => {
         response.body.should.have.property('data').and.be.an('array').and.length(0);
     });
 
-    it('Find metadatas with id list containing metadata that does not exist returns an empty list (empty db)', async () => {
-        const response = await requester
-            .post(`/api/v1/dataset/metadata/find-by-ids`)
-            .send({
-                ids: ['abcd']
-            });
-
-        response.status.should.equal(200);
-        response.body.should.have.property('data').and.be.an('array').and.length(0);
-    });
-
     it('Find metadatas with id list containing a metadata that exists returns only the listed metadata', async () => {
         metadataOne = await new Metadata(createMetadata()).save();
         metadataTwo = await new Metadata(createMetadata()).save();

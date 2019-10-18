@@ -1,3 +1,4 @@
+const MetadataModel = require('models/metadata.model');
 const { ROLES } = require('./test.constants');
 
 function deserializeDataset(response) {
@@ -92,10 +93,13 @@ const createMetadata = (type) => {
     };
 };
 
+const createMetadataInDB = async () => (MetadataModel(createMetadata()).save());
+
 module.exports = {
     deserializeDataset,
     validateMetadata,
     createMetadata,
+    createMetadataInDB,
     initHelpers,
     getUUID,
     ensureCorrectError

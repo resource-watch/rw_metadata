@@ -3,7 +3,9 @@ const nock = require('nock');
 const { ROLES } = require('./test.constants');
 const { getTestServer } = require('./test-server');
 const { createMetadataResourceForUpdate, WIDGET_WRONG_DATAS } = require('./test.constants');
-const { validateMetadata, ensureCorrectError, initHelpers, createMetadata } = require('./utils');
+const {
+    validateMetadata, ensureCorrectError, initHelpers, createMetadata
+} = require('./utils');
 
 const requester = getTestServer();
 const prefix = '/api/v1/dataset';
@@ -15,7 +17,8 @@ const helpers = initHelpers(
     requester,
     `${prefix}/${DEFAULT.datasetID}/widget/${DEFAULT.widgetID}/metadata`,
     'patch',
-    createMetadataResourceForUpdate('widget'));
+    createMetadataResourceForUpdate('widget')
+);
 
 const updateWidget = (data = createMetadataResourceForUpdate('widget'), datasetID = DEFAULT.datasetID) => requester
     .patch(`${prefix}/${datasetID}/widget/${data.resource.id}/metadata`)
