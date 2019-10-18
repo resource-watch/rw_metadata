@@ -15,11 +15,11 @@ services:
       MONGO_PORT_27017_TCP_ADDR: rw-metadata-mongo-test
       MONGO_PORT_27017_TCP_DATABASE: metadata_db_test
     command: test
-    links:
-    - mongo
+    depends_on:
+      - mongo
+
   mongo:
     image: mongo:3.4
     container_name: rw-metadata-mongo-test
     ports:
-    - "27017"
-    restart: always
+      - "27017"
