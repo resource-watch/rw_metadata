@@ -3,8 +3,6 @@ services:
   test:
     build: .
     container_name: rw-metadata-test
-    env_file:
-      - dev.env
     environment:
       CT_REGISTER_MODE: auto
       NODE_ENV: test
