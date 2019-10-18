@@ -1,21 +1,19 @@
 /* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
-const Metadata = require('models/metadata.model');
+const MetadataModel = require('models/metadata.model');
 const {
     ROLES
 } = require('./test.constants');
 
 const should = chai.should();
 
-const { validateMetadata, deserializeDataset, createMetadata } = require('./utils');
+const {
+    validateMetadata, deserializeDataset, createMetadata, createMetadataInDB
+} = require('./utils');
 const { getTestServer } = require('./test-server');
 
 const requester = getTestServer();
-
-let fakeMetadataOne = null;
-let fakeMetadataTwo = null;
-let fakeMetadataThree = null;
 
 describe('EDIT METADATA:', () => {
 
@@ -26,14 +24,15 @@ describe('EDIT METADATA:', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
-
-        fakeMetadataOne = createMetadata();
-        fakeMetadataTwo = createMetadata();
-        fakeMetadataThree = createMetadata();
+        await MetadataModel.remove({}).exec();
     });
 
     it('Create metadata for a dataset', async () => {
+        fakeMetadataOne = createMetadata();
+        fakeMetadataTwo = createMetadata();
+        fakeMetadataThree = createMetadata();
+
+
         const metadatas = [fakeMetadataOne, fakeMetadataTwo, fakeMetadataThree];
 
         for (const metadata of metadatas) {
@@ -49,50 +48,61 @@ describe('EDIT METADATA:', () => {
         }
     });
 
-    it('Update metadata for a dataset', async () => {
+    it('Update metadata for a dataset should return a 200 HTTP code with the updated data (happy case)', async () => {
+        const fakeMetadataOne = await createMetadataInDB();
+
         const response = await requester
             .patch(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
-            .send(Object.assign({}, fakeMetadataTwo, { loggedUser: ROLES.ADMIN }));
+            .send({
+                language: fakeMetadataOne.language,
+                application: fakeMetadataOne.application,
+                loggedUser: ROLES.ADMIN
+            });
 
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.a('array');
 
         const createdDataset = deserializeDataset(response)[0];
 
-        const updatedDatasetOne = Object.assign({}, fakeMetadataTwo, { dataset: fakeMetadataOne.dataset });
+        const updatedDatasetOne = Object.assign({}, fakeMetadataOne.toObject(), { dataset: fakeMetadataOne.dataset });
         validateMetadata(createdDataset, updatedDatasetOne);
+    });
 
+    it('Update metadata with empty fields for a dataset should return a 200 HTTP code with the updated data', async () => {
+        const fakeMetadataOne = await createMetadataInDB();
 
-        // Below we test if the user can empty the string fields correctly
-        {
-            const fieldsToTest = ['description', 'source', 'citation', 'license'];
+        const response = await requester
+            .patch(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
+            .send({
+                language: fakeMetadataOne.language,
+                application: fakeMetadataOne.application,
+                loggedUser: ROLES.ADMIN,
+                description: '',
+                source: '',
+                citation: '',
+                license: ''
+            });
 
-            const body = Object.assign(
-                {},
-                fakeMetadataThree,
-                fieldsToTest.reduce((res, field) => Object.assign({}, res, { [field]: '' }), {}),
-                { loggedUser: ROLES.ADMIN }
-            );
+        response.status.should.equal(200);
+        response.body.should.have.property('data').and.be.a('array');
 
-            const response = await requester
-                .patch(`/api/v1/dataset/${fakeMetadataThree.dataset}/metadata`)
-                .send(body);
+        const responseDataset = deserializeDataset(response)[0];
 
-            response.status.should.equal(200);
-            response.body.should.have.property('data').and.be.a('array');
+        const expectedDataset = Object.assign({}, fakeMetadataOne.toObject(), {
+            dataset: fakeMetadataOne.dataset,
+            description: '',
+            source: '',
+            citation: '',
+            license: ''
+        });
 
-            const actual = deserializeDataset(response)[0];
-            const expected = Object.assign(
-                {},
-                fakeMetadataThree,
-                fieldsToTest.reduce((res, field) => Object.assign({}, res, { [field]: '' }), {})
-            );
-
-            validateMetadata(actual, expected);
-        }
+        validateMetadata(responseDataset, expectedDataset);
     });
 
     it('Delete metadata for a dataset', async () => {
+        const fakeMetadataOne = await createMetadataInDB();
+        const fakeMetadataTwo = await createMetadataInDB();
+
         const responseOne = await requester
             .delete(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
             .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
@@ -102,6 +112,9 @@ describe('EDIT METADATA:', () => {
         responseOne.body.should.have.property('data').and.be.a('array');
 
         const loadedDatasetOne = deserializeDataset(responseOne)[0];
+
+        validateMetadata(loadedDatasetOne, fakeMetadataOne.toObject());
+
 
         const responseTwo = await requester
             .delete(`/api/v1/dataset/${fakeMetadataTwo.dataset}/metadata`)
@@ -113,19 +126,15 @@ describe('EDIT METADATA:', () => {
 
         const loadedDatasetTwo = deserializeDataset(responseTwo)[0];
 
-        const updatedDatasetOne = Object.assign({}, fakeMetadataTwo, { dataset: fakeMetadataOne.dataset });
-
-        validateMetadata(loadedDatasetOne, updatedDatasetOne);
         validateMetadata(loadedDatasetTwo, fakeMetadataTwo);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await MetadataModel.remove({}).exec();
+
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
-    });
-
-    after(() => {
-        Metadata.remove({}).exec();
     });
 });

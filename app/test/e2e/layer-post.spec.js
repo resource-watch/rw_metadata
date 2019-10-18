@@ -15,7 +15,8 @@ const helpers = initHelpers(
     requester,
     `${prefix}/${DEFAULT.datasetID}/layer/${DEFAULT.layerID}/metadata`,
     'post',
-    createMetadataResource('layer'));
+    createMetadataResource('layer')
+);
 
 const createLayer = (data = createMetadataResource('layer')) => {
     const { widgetID, datasetID } = DEFAULT;

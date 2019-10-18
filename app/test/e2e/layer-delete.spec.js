@@ -16,7 +16,8 @@ const helpers = initHelpers(
     `${prefix}/${DEFAULT.datasetID}/layer/${DEFAULT.widgetID}/metadata`,
     'delete',
     {},
-    '?language=en&application=rw');
+    '?language=en&application=rw'
+);
 
 describe('METADATA LAYER DELETE endpoint', () => {
     before(async () => {

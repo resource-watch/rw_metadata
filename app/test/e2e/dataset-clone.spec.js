@@ -2,7 +2,9 @@ const Metadata = require('models/metadata.model');
 const nock = require('nock');
 const { ROLES } = require('./test.constants');
 const { getTestServer } = require('./test-server');
-const { validateMetadata, deserializeDataset, createMetadata, ensureCorrectError, initHelpers } = require('./utils');
+const {
+    validateMetadata, deserializeDataset, createMetadata, ensureCorrectError, initHelpers
+} = require('./utils');
 
 const requester = getTestServer();
 const prefix = '/api/v1/dataset';
@@ -10,7 +12,8 @@ const helpers = initHelpers(
     requester,
     `${prefix}/123/metadata/clone`,
     'post',
-    { newDataset: 'test123' });
+    { newDataset: 'test123' }
+);
 
 describe('DATASET CLONE endpint', () => {
     before(async () => {
