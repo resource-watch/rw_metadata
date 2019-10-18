@@ -15,9 +15,6 @@ const requester = getTestServer();
 chai.use(chaiHttp);
 chai.use(chaiDatetime);
 
-let fakeMetadataOne = null;
-let fakeMetadataTwo = null;
-
 describe('Access metadata', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -26,12 +23,12 @@ describe('Access metadata', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('Get metadata for a single dataset', async () => {
-        fakeMetadataOne = await new Metadata(createMetadata()).save();
-        fakeMetadataTwo = await new Metadata(createMetadata()).save();
+        const fakeMetadataOne = await new Metadata(createMetadata()).save();
+        const fakeMetadataTwo = await new Metadata(createMetadata()).save();
 
         const response = await requester
             .get(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`);
@@ -47,6 +44,10 @@ describe('Access metadata', () => {
     });
 
     it('Get metadata for multiple datasets', async () => {
+        const fakeMetadataOne = await new Metadata(createMetadata()).save();
+        const fakeMetadataTwo = await new Metadata(createMetadata()).save();
+
+
         const response = await requester
             .get(`/api/v1/metadata`);
         response.status.should.equal(200);
@@ -64,12 +65,10 @@ describe('Access metadata', () => {
     });
 
     afterEach(() => {
+        Metadata.remove({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
-    });
-
-    after(async () => {
-        Metadata.remove({}).exec();
     });
 });
