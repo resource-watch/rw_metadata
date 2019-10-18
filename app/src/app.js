@@ -5,6 +5,7 @@ const koaValidate = require('koa-validate');
 const config = require('config');
 const loader = require('loader');
 const mongoose = require('mongoose');
+const sleep = require('sleep');
 const ctRegisterMicroservice = require('sd-ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
 
@@ -17,9 +18,12 @@ const koaBody = require('koa-body')({
     textLimit: '50mb'
 });
 
+let retries = 10;
+
 const onDbReady = (err) => {
     if (err) {
         if (retries >= 0) {
+            // eslint-disable-next-line no-plusplus
             retries--;
             logger.error(`Failed to connect to MongoDB uri ${mongoUri} with error message "${err.message}", retrying...`);
             sleep.sleep(5);
