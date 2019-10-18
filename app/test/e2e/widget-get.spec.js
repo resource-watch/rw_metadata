@@ -13,7 +13,7 @@ describe('METADATA WIDGET GET endpoint', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('should return empty array without creating metadata', async () => {
@@ -30,8 +30,8 @@ describe('METADATA WIDGET GET endpoint', () => {
         validateMetadata(response.body.data[0], fakeMetadata);
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

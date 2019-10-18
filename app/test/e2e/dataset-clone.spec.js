@@ -23,7 +23,7 @@ describe('DATASET CLONE endpint', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('close without being authenticated should fall', helpers.isTokenRequired());
@@ -49,8 +49,8 @@ describe('DATASET CLONE endpint', () => {
         validateMetadata(clonedMetadata, Object.assign(fakeMetadata, { dataset: newDataset }));
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

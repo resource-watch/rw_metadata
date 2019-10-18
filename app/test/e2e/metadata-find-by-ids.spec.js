@@ -26,7 +26,7 @@ describe('Find metadatas by IDs', () => {
 
         requester = await getTestServer();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('Find metadatas without ids in body returns a 400 error', async () => {
@@ -143,7 +143,7 @@ describe('Find metadatas by IDs', () => {
         }
     });
 
-    after(() => {
-        Metadata.remove({}).exec();
+    after(async () => {
+        await Metadata.remove({}).exec();
     });
 });

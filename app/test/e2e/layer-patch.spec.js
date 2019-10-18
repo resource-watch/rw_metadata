@@ -32,7 +32,7 @@ describe('METADATA LAYER PATCH endpoint', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('update layer metadata without being authenticated should fall', helpers.isTokenRequired());
@@ -57,8 +57,8 @@ describe('METADATA LAYER PATCH endpoint', () => {
         validateMetadata(layer.body.data[0], Object.assign({}, defaultWidget, { dataset: metadata.dataset }));
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

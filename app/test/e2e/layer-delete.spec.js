@@ -27,7 +27,7 @@ describe('METADATA LAYER DELETE endpoint', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.remove({}).exec();
     });
 
     it('delete layer without being authenticated should fall', helpers.isTokenRequired());
@@ -45,8 +45,8 @@ describe('METADATA LAYER DELETE endpoint', () => {
         expect(layers).to.be.length(0);
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

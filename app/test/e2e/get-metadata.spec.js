@@ -64,8 +64,8 @@ describe('Access metadata', () => {
         validateMetadata(loadedDatasetTwo, fakeMetadataTwo);
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
