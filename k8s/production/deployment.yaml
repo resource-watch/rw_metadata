@@ -2,9 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: {name}
+    name: metadata
     app: rw
-  name: {name}
+  name: metadata
 spec:
   revisionHistoryLimit: 2
   template:
@@ -12,11 +12,11 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: metadata
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: metadata
+        image: vizzuality/metadata
         imagePullPolicy: Always
         resources:
           requests:
@@ -33,7 +33,7 @@ spec:
           - name: NODE_PATH
             value: app/src
           - name: LOCAL_URL
-            value: http://{name}.default.svc.cluster.local:4000
+            value: http://metadata.default.svc.cluster.local:4000
           - name: MONGO_URI
             valueFrom:
                 secretKeyRef:
