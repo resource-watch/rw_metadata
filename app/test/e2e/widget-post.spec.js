@@ -23,7 +23,7 @@ const createWidget = (data = createMetadataResource('widget')) => {
 
     return requester
         .post(`${prefix}/${datasetID}/widget/${widgetID}/metadata`)
-        .send(Object.assign({}, data, { loggedUser: ROLES.ADMIN }));
+        .send({ ...data, loggedUser: ROLES.ADMIN });
 };
 
 describe('METADATA WIDGET POST endpoint', () => {
@@ -46,7 +46,7 @@ describe('METADATA WIDGET POST endpoint', () => {
     it('create widget with wrong data, should return error which specified in constant', async () => {
         await Promise.all(WIDGET_WRONG_DATAS.map(async ({ data, expectedError }) => {
             const defaultMetadata = createMetadataResource('widget');
-            const widget = await createWidget(Object.assign({}, defaultMetadata, data));
+            const widget = await createWidget({ ...defaultMetadata, ...data });
             widget.status.should.equal(400);
             ensureCorrectError(widget.body, expectedError);
         }));
@@ -56,7 +56,7 @@ describe('METADATA WIDGET POST endpoint', () => {
         const defaultWidget = createMetadataResource('widget');
         const widget = await createWidget(defaultWidget);
 
-        validateMetadata(widget.body.data[0], Object.assign({}, defaultWidget, { dataset: DEFAULT.datasetID }));
+        validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });
 
     afterEach(async () => {

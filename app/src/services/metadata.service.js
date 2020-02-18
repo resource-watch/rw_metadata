@@ -165,12 +165,8 @@ class MetadataService {
 
         const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        try {
-            const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
-            return result;
-        } catch (err) {
-            throw err;
-        }
+        const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
+        return result;
     }
 
     static async getByIds(resource, filter) {
@@ -187,18 +183,14 @@ class MetadataService {
     static async clone(user, dataset, resource, body) {
         logger.debug('Checking if metadata exists');
         let metadatas = await MetadataService.get(dataset, resource, {});
-        metadatas = metadatas.map(metadata => metadata.toObject());
+        metadatas = metadatas.map((metadata) => metadata.toObject());
         if (metadatas.length === 0) {
             throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
         }
-        try {
-            return await MetadataService.createSome(user, metadatas, body.newDataset, {
-                type: 'dataset',
-                id: body.newDataset
-            });
-        } catch (err) {
-            throw err;
-        }
+        return MetadataService.createSome(user, metadatas, body.newDataset, {
+            type: 'dataset',
+            id: body.newDataset
+        });
     }
 
     /*

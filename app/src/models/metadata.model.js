@@ -16,8 +16,12 @@ const Metadata = new Schema({
     },
     userId: { type: String, required: true, trim: true },
     language: { type: String, required: true, trim: true },
-    name: { type: String, required: false, trim: true, index: true },
-    description: { type: String, required: false, trim: true, index: true },
+    name: {
+        type: String, required: false, trim: true, index: true
+    },
+    description: {
+        type: String, required: false, trim: true, index: true
+    },
     source: { type: String, required: false, trim: true },
     citation: { type: String, required: false, trim: true },
     license: { type: String, required: false, trim: true },

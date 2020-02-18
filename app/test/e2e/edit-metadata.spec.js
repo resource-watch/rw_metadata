@@ -35,17 +35,17 @@ describe('EDIT METADATA:', () => {
 
         const metadatas = [fakeMetadataOne, fakeMetadataTwo, fakeMetadataThree];
 
-        for (const metadata of metadatas) {
+        metadatas.forEach(async (metadata) => {
             const response = await requester
                 .post(`/api/v1/dataset/${metadata.dataset}/metadata`)
-                .send(Object.assign({}, metadata, { loggedUser: ROLES.ADMIN }));
+                .send({ ...metadata, loggedUser: ROLES.ADMIN });
             const createdDataset = deserializeDataset(response)[0];
 
             response.status.should.equal(200);
             response.body.should.have.property('data').and.be.a('array');
 
             validateMetadata(createdDataset, metadata);
-        }
+        });
     });
 
     it('Update metadata for a dataset should return a 200 HTTP code with the updated data (happy case)', async () => {
@@ -64,7 +64,7 @@ describe('EDIT METADATA:', () => {
 
         const createdDataset = deserializeDataset(response)[0];
 
-        const updatedDatasetOne = Object.assign({}, fakeMetadataOne.toObject(), { dataset: fakeMetadataOne.dataset });
+        const updatedDatasetOne = { ...fakeMetadataOne.toObject(), dataset: fakeMetadataOne.dataset };
         validateMetadata(createdDataset, updatedDatasetOne);
     });
 
@@ -88,13 +88,14 @@ describe('EDIT METADATA:', () => {
 
         const responseDataset = deserializeDataset(response)[0];
 
-        const expectedDataset = Object.assign({}, fakeMetadataOne.toObject(), {
+        const expectedDataset = {
+            ...fakeMetadataOne.toObject(),
             dataset: fakeMetadataOne.dataset,
             description: '',
             source: '',
             citation: '',
             license: ''
-        });
+        };
 
         validateMetadata(responseDataset, expectedDataset);
     });
