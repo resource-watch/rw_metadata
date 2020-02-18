@@ -1,9 +1,9 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
-const { ROLES } = require('./test.constants');
-const { getTestServer } = require('./test-server');
-const { createMetadataResource, WIDGET_WRONG_DATAS } = require('./test.constants');
-const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils');
+const { ROLES } = require('./utils/test.constants');
+const { getTestServer } = require('./utils/test-server');
+const { createMetadataResource, WIDGET_WRONG_DATAS } = require('./utils/test.constants');
+const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils/helpers');
 
 const requester = getTestServer();
 const prefix = '/api/v1/dataset';

@@ -6,8 +6,8 @@ const chaiDatetime = require('chai-datetime');
 const Metadata = require('models/metadata.model');
 
 const should = chai.should();
-const { validateMetadata, deserializeDataset, createMetadata } = require('./utils');
-const { getTestServer } = require('./test-server');
+const { validateMetadata, deserializeDataset, createMetadata } = require('./utils/helpers');
+const { getTestServer } = require('./utils/test-server');
 
 const requester = getTestServer();
 

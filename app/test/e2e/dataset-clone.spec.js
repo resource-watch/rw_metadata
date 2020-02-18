@@ -1,10 +1,10 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
-const { ROLES } = require('./test.constants');
-const { getTestServer } = require('./test-server');
+const { ROLES } = require('./utils/test.constants');
+const { getTestServer } = require('./utils/test-server');
 const {
     validateMetadata, deserializeDataset, createMetadata, ensureCorrectError, initHelpers
-} = require('./utils');
+} = require('./utils/helpers');
 
 const requester = getTestServer();
 const prefix = '/api/v1/dataset';

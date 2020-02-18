@@ -4,14 +4,14 @@ const chai = require('chai');
 const MetadataModel = require('models/metadata.model');
 const {
     ROLES
-} = require('./test.constants');
+} = require('./utils/test.constants');
 
 const should = chai.should();
 
 const {
     validateMetadata, deserializeDataset, createMetadata, createMetadataInDB
-} = require('./utils');
-const { getTestServer } = require('./test-server');
+} = require('./utils/helpers');
+const { getTestServer } = require('./utils/test-server');
 
 const requester = getTestServer();
 

@@ -1,7 +1,7 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
-const { getTestServer } = require('./test-server');
-const { createMetadata, validateMetadata } = require('./utils');
+const { getTestServer } = require('./utils/test-server');
+const { createMetadata, validateMetadata } = require('./utils/helpers');
 
 const requester = getTestServer();
 
