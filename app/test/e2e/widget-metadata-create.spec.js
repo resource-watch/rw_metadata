@@ -9,14 +9,13 @@ const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils/h
 chai.should();
 
 const requester = getTestServer();
-const prefix = '/api/v1/dataset';
 const DEFAULT = {
     widgetID: 'test123',
     datasetID: 'test123',
 };
 const helpers = initHelpers(
     requester,
-    `${prefix}/${DEFAULT.datasetID}/widget/${DEFAULT.widgetID}/metadata`,
+    `/api/v1/dataset/${DEFAULT.datasetID}/widget/${DEFAULT.widgetID}/metadata`,
     'post',
     createMetadataResource('widget')
 );
@@ -25,7 +24,7 @@ const createWidget = (data = createMetadataResource('widget')) => {
     const { widgetID, datasetID } = DEFAULT;
 
     return requester
-        .post(`${prefix}/${datasetID}/widget/${widgetID}/metadata`)
+        .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
         .send({ ...data, loggedUser: ROLES.ADMIN });
 };
 
@@ -42,9 +41,11 @@ describe('Create widget metadata endpoint', () => {
 
     it('Create widget metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('Create widget metadata being authenticated as USER should fail', helpers.isUserForbidden());
+    it('Create widget metadata while being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('Create widget metadata being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
+    it('Create widget metadata while being authenticated as MANAGER with the wrong app should fail', helpers.isManagerWithWrongAppForbidden());
+
+    it('Create widget metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
     it('Create widget metadata with wrong data, should return error which specified in constant', async () => {
         await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
@@ -55,9 +56,26 @@ describe('Create widget metadata endpoint', () => {
         }));
     });
 
-    it('Create widget  metadata should success', async () => {
+    it('Create widget metadata while being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
         const defaultWidget = createMetadataResource('widget');
-        const widget = await createWidget(defaultWidget);
+
+        const { widgetID, datasetID } = DEFAULT;
+
+        const widget = await requester
+            .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.MANAGER });
+
+        validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
+    });
+
+    it('Create widget metadata while being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
+        const defaultWidget = createMetadataResource('widget');
+
+        const { widgetID, datasetID } = DEFAULT;
+
+        const widget = await requester
+            .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
 
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });
