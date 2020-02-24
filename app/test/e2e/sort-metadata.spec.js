@@ -1,13 +1,12 @@
-/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiDatetime = require('chai-datetime');
 const Metadata = require('models/metadata.model');
-
-const should = chai.should();
 const { validateMetadata, deserializeDataset, createMetadata } = require('./utils/helpers');
 const { getTestServer } = require('./utils/test-server');
+
+chai.should();
 
 const requester = getTestServer();
 
@@ -26,7 +25,7 @@ describe('Sort metadata', () => {
 
         nock.cleanAll();
 
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
 
         const metadataOne = createMetadata();
         const metadataTwo = createMetadata();
@@ -131,6 +130,6 @@ describe('Sort metadata', () => {
     });
 
     after(async () => {
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 });

@@ -104,7 +104,7 @@ class MetadataValidator {
                 );
         }
         if (koaObj.errors) {
-            logger.error('Error validating metadata creation');
+            logger.info('Error validating metadata creation');
             throw new MetadataNotValid(koaObj.errors);
         }
         return true;
@@ -114,7 +114,7 @@ class MetadataValidator {
         logger.info('Validating Metadata Cloning');
         koaObj.checkBody('newDataset').notEmpty().toLow();
         if (koaObj.errors) {
-            logger.error('Error validating metadata cloning');
+            logger.info('Error validating metadata cloning');
             throw new CloneNotValid(koaObj.errors);
         }
         return true;

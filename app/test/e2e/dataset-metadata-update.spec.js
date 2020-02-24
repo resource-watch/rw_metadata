@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const MetadataModel = require('models/metadata.model');
@@ -6,7 +5,7 @@ const {
     ROLES
 } = require('./utils/test.constants');
 
-const should = chai.should();
+chai.should();
 
 const {
     validateMetadata, deserializeDataset, createMetadata, createMetadataInDB
@@ -15,7 +14,7 @@ const { getTestServer } = require('./utils/test-server');
 
 const requester = getTestServer();
 
-describe('EDIT METADATA:', () => {
+describe('Update dataset metadata endpoint', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -24,14 +23,13 @@ describe('EDIT METADATA:', () => {
 
         nock.cleanAll();
 
-        await MetadataModel.remove({}).exec();
+        await MetadataModel.deleteMany({}).exec();
     });
 
     it('Create metadata for a dataset', async () => {
-        fakeMetadataOne = createMetadata();
-        fakeMetadataTwo = createMetadata();
-        fakeMetadataThree = createMetadata();
-
+        const fakeMetadataOne = createMetadata();
+        const fakeMetadataTwo = createMetadata();
+        const fakeMetadataThree = createMetadata();
 
         const metadatas = [fakeMetadataOne, fakeMetadataTwo, fakeMetadataThree];
 
@@ -131,7 +129,7 @@ describe('EDIT METADATA:', () => {
     });
 
     afterEach(async () => {
-        await MetadataModel.remove({}).exec();
+        await MetadataModel.deleteMany({}).exec();
 
 
         if (!nock.isDone()) {

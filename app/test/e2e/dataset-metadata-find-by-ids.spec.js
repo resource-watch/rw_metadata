@@ -1,12 +1,10 @@
-/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const Metadata = require('models/metadata.model');
 const { validateMetadata, deserializeDataset, createMetadata } = require('./utils/helpers');
-
 const { getTestServer } = require('./utils/test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 
@@ -17,7 +15,7 @@ let metadataOne;
 let metadataTwo;
 
 
-describe('Find metadatas by IDs', () => {
+describe('Find dataset metadata by IDs', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -26,7 +24,7 @@ describe('Find metadatas by IDs', () => {
 
         requester = await getTestServer();
 
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
     it('Find metadatas without ids in body returns a 400 error', async () => {
@@ -112,7 +110,6 @@ describe('Find metadatas by IDs', () => {
         response.body.should.have.property('data').and.be.an('array').and.length(1);
 
         const loadedDatasetOne = deserializeDataset(response)[0];
-        const loadedDatasetTwo = deserializeDataset(response)[1];
 
         loadedDatasetOne.should.have.property('attributes');
 
@@ -130,7 +127,6 @@ describe('Find metadatas by IDs', () => {
         response.body.should.have.property('data').and.be.an('array').and.length(1);
 
         const loadedDatasetOne = deserializeDataset(response)[0];
-        const loadedDatasetTwo = deserializeDataset(response)[1];
 
         loadedDatasetOne.should.have.property('attributes');
 
@@ -144,6 +140,6 @@ describe('Find metadatas by IDs', () => {
     });
 
     after(async () => {
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 });

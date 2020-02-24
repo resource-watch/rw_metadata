@@ -1,9 +1,12 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
+const chai = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
-const { createMetadataResource, WIDGET_WRONG_DATAS } = require('./utils/test.constants');
+const { createMetadataResource, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils/helpers');
+
+chai.should();
 
 const requester = getTestServer();
 const prefix = '/api/v1/dataset';
@@ -26,7 +29,7 @@ const createWidget = (data = createMetadataResource('widget')) => {
         .send({ ...data, loggedUser: ROLES.ADMIN });
 };
 
-describe('METADATA WIDGET POST endpoint', () => {
+describe('Create widget metadata endpoint', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -34,17 +37,17 @@ describe('METADATA WIDGET POST endpoint', () => {
 
         nock.cleanAll();
 
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
-    it('create widget without being authenticated should fall', helpers.isTokenRequired());
+    it('Create widget metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('create widget being authenticated as USER should fall', helpers.isUserForbidden());
+    it('Create widget metadata being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('create widget being authenticated as ADMIN but with wrong application should fall', helpers.isRightAppRequired());
+    it('Create widget metadata being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
 
-    it('create widget with wrong data, should return error which specified in constant', async () => {
-        await Promise.all(WIDGET_WRONG_DATAS.map(async ({ data, expectedError }) => {
+    it('Create widget metadata with wrong data, should return error which specified in constant', async () => {
+        await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
             const defaultMetadata = createMetadataResource('widget');
             const widget = await createWidget({ ...defaultMetadata, ...data });
             widget.status.should.equal(400);
@@ -52,7 +55,7 @@ describe('METADATA WIDGET POST endpoint', () => {
         }));
     });
 
-    it('create widget should success', async () => {
+    it('Create widget  metadata should success', async () => {
         const defaultWidget = createMetadataResource('widget');
         const widget = await createWidget(defaultWidget);
 
@@ -60,7 +63,7 @@ describe('METADATA WIDGET POST endpoint', () => {
     });
 
     afterEach(async () => {
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

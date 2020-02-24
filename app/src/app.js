@@ -9,15 +9,11 @@ const sleep = require('sleep');
 const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const ctRegisterMicroservice = require('sd-ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
+const koaBody = require('koa-body');
+
+const mongooseOptions = require('../../config/mongoose');
 
 const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-
-const koaBody = require('koa-body')({
-    multipart: true,
-    jsonLimit: '50mb',
-    formLimit: '50mb',
-    textLimit: '50mb'
-});
 
 let retries = 10;
 
@@ -28,7 +24,7 @@ const onDbReady = (err) => {
             retries--;
             logger.error(`Failed to connect to MongoDB uri ${mongoUri} with error message "${err.message}", retrying...`);
             sleep.sleep(5);
-            mongoose.connect(mongoUri, onDbReady);
+            mongoose.connect(mongoUri, mongooseOptions, onDbReady);
         } else {
             logger.error('MongoURI', mongoUri);
             logger.error(err);
@@ -37,13 +33,16 @@ const onDbReady = (err) => {
     }
 };
 
-
-mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
-
+mongoose.connect(mongoUri, mongooseOptions, onDbReady);
 
 const app = new Koa();
 
-app.use(koaBody);
+app.use(koaBody({
+    multipart: true,
+    jsonLimit: '50mb',
+    formLimit: '50mb',
+    textLimit: '50mb'
+}));
 
 app.use(async (ctx, next) => {
     try {

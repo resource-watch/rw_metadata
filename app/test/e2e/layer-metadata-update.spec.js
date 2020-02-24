@@ -1,30 +1,32 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
+const chai = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
-const { createMetadataResourceForUpdate, WIDGET_WRONG_DATAS } = require('./utils/test.constants');
+const { createMetadataResourceForUpdate, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const {
     validateMetadata, ensureCorrectError, initHelpers, createMetadata
 } = require('./utils/helpers');
 
+chai.should();
+
 const requester = getTestServer();
-const prefix = '/api/v1/dataset';
 const DEFAULT = {
     widgetID: 'test123',
     datasetID: 'test123',
 };
 const helpers = initHelpers(
     requester,
-    `${prefix}/${DEFAULT.datasetID}/layer/${DEFAULT.widgetID}/metadata`,
+    `/api/v1/dataset/${DEFAULT.datasetID}/layer/${DEFAULT.widgetID}/metadata`,
     'patch',
     createMetadataResourceForUpdate('layer')
 );
 
 const updateLayer = (data = createMetadataResourceForUpdate('layer'), datasetID = DEFAULT.datasetID) => requester
-    .patch(`${prefix}/${datasetID}/layer/${data.resource.id}/metadata`)
+    .patch(`/api/v1/dataset/${datasetID}/layer/${data.resource.id}/metadata`)
     .send({ ...data, loggedUser: ROLES.ADMIN });
 
-describe('METADATA LAYER PATCH endpoint', () => {
+describe('Update layer metadata endpoint', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -32,17 +34,17 @@ describe('METADATA LAYER PATCH endpoint', () => {
 
         nock.cleanAll();
 
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
-    it('update layer metadata without being authenticated should fall', helpers.isTokenRequired());
+    it('Update layer metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('update layer metadata being authenticated as USER should fall', helpers.isUserForbidden());
+    it('Update layer metadata being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('update layer metadata being authenticated as ADMIN but with wrong application should fall', helpers.isRightAppRequired());
+    it('Update layer metadata being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
 
-    it('update layer metadata with wrong data, should return error which specified in constant', async () => {
-        await Promise.all(WIDGET_WRONG_DATAS.map(async ({ data, expectedError }) => {
+    it('Update layer metadata with wrong data, should return error which specified in constant', async () => {
+        await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
             const defaultMetadata = createMetadataResourceForUpdate('layer');
             const layer = await updateLayer({ ...defaultMetadata, ...data });
             layer.status.should.equal(400);
@@ -58,7 +60,7 @@ describe('METADATA LAYER PATCH endpoint', () => {
     });
 
     afterEach(async () => {
-        await Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

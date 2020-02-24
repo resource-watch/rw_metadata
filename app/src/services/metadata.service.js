@@ -129,7 +129,7 @@ class MetadataService {
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
         }
         logger.debug('Deleting metadata');
-        await Metadata.remove(finalQuery).exec();
+        await Metadata.deleteMany(finalQuery).exec();
         return metadata;
     }
 
