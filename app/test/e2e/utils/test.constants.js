@@ -52,7 +52,7 @@ const ROLES = {
     }
 };
 
-const WIDGET_WRONG_DATAS = [
+const COMMON_AUTH_ERROR_CASES = [
     { expectedError: '- language: language check failed. - ', data: { language: 123 } },
     { expectedError: '- application: application check failed. - ', data: { application: {} } },
     { expectedError: '- description: should be a valid string - ', data: { description: 123 } },
@@ -124,5 +124,5 @@ module.exports = {
     ROLES,
     createMetadataResource,
     createMetadataResourceForUpdate,
-    WIDGET_WRONG_DATAS,
+    COMMON_AUTH_ERROR_CASES,
 };
