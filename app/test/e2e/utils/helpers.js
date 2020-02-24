@@ -1,4 +1,5 @@
 const MetadataModel = require('models/metadata.model');
+const clone = require('lodash/clone');
 const { ROLES } = require('./test.constants');
 
 function deserializeDataset(response) {
@@ -30,29 +31,73 @@ const ensureCorrectError = (body, errMessage) => {
 
 const getUUID = () => Math.random().toString(36).substring(7);
 
-const initHelpers = (requester, url, initMethod, initialData = {}, queryParams = '?language=en') => {
+const initHelpers = (requester, url, initMethod, initialData = {}, queryParams = { language: 'en' }) => {
     const isUserForbidden = (method = initMethod) => async () => {
-        const response = await requester[method](`${url + queryParams}&loggedUser=${JSON.stringify(ROLES.USER)}`)
+        const query = clone(queryParams);
+
+        if (['delete', 'get'].includes(method.toLowerCase())) {
+            query.loggedUser = JSON.stringify(ROLES.USER);
+        } else {
+            initialData.loggedUser = ROLES.USER;
+        }
+
+        const response = await requester[method](url)
+            .query(query)
             .send(initialData);
+
         response.status.should.equal(403);
         ensureCorrectError(response.body, 'Forbidden');
     };
 
-    const isRightAppRequired = (method = initMethod) => async () => {
-        const response = await requester[method](`${url}?language=en&application=test123&loggedUser=${JSON.stringify(ROLES.USER)}`)
+    const isManagerWithWrongAppForbidden = (method = initMethod) => async () => {
+        const query = clone(queryParams);
+        query.application = 'test123';
+
+        if (['delete', 'get'].includes(method.toLowerCase())) {
+            query.loggedUser = JSON.stringify(ROLES.MANAGER);
+        } else {
+            initialData.loggedUser = ROLES.MANAGER;
+        }
+
+        const response = await requester[method](url)
+            .query(query)
             .send(initialData);
+
+        response.status.should.equal(403);
+        ensureCorrectError(response.body, 'Forbidden');
+    };
+
+    const isAdminWithWrongAppForbidden = (method = initMethod) => async () => {
+        const query = {
+            language: 'en',
+            application: 'test123'
+        };
+        if (['delete', 'get'].includes(method.toLowerCase())) {
+            query.loggedUser = JSON.stringify(ROLES.ADMIN);
+        } else {
+            initialData.loggedUser = ROLES.ADMIN;
+        }
+
+        const response = await requester[method](url)
+            .query(query)
+            .send(initialData);
+
         response.status.should.equal(403);
         ensureCorrectError(response.body, 'Forbidden');
     };
 
     const isTokenRequired = (method = initMethod) => async () => {
-        const response = await requester[method](url + queryParams).send(initialData);
+        const response = await requester[method](url)
+            .query(queryParams)
+            .send(initialData);
+
         response.status.should.equal(401);
         ensureCorrectError(response.body, 'Unauthorized');
     };
 
     return {
-        isRightAppRequired,
+        isAdminWithWrongAppForbidden,
+        isManagerWithWrongAppForbidden,
         isUserForbidden,
         isTokenRequired,
     };

@@ -17,7 +17,7 @@ const helpers = initHelpers(
     { newDataset: 'test123' }
 );
 
-describe('Dataset metadata clone endpoint', () => {
+describe('Clone dataset metadata endpoint', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -28,19 +28,32 @@ describe('Dataset metadata clone endpoint', () => {
         await Metadata.deleteMany({}).exec();
     });
 
-    it('Cloning without being authenticated should fail', helpers.isTokenRequired());
+    it('Cloning dataset metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('Cloning with being authenticated as USER should fail', helpers.isUserForbidden());
+    it('Cloning dataset metadata while being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('Cloning with being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
+    it('Cloning dataset metadata while being authenticated as MANAGER with the wrong app should fail', helpers.isManagerWithWrongAppForbidden());
 
-    it('Cloning without body should fail', async () => {
+    it('Cloning dataset metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
+
+    it('Cloning dataset metadata without body should fail', async () => {
         const response = await requester.post(`/api/v1/dataset/123/metadata/clone`).send();
         response.status.should.equal(400);
         ensureCorrectError(response.body, '- newDataset: newDataset can not be empty. - ');
     });
 
-    it('Cloning should success', async () => {
+    it('Cloning dataset metadata while being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
+        const newDataset = 'test123';
+        const fakeMetadata = await new Metadata(createMetadata()).save();
+        const response = await requester
+            .post(`/api/v1/dataset/${fakeMetadata.dataset}/metadata/clone`)
+            .send({ newDataset, loggedUser: ROLES.MANAGER, application: 'rw' });
+
+        const clonedMetadata = deserializeDataset(response)[0];
+        validateMetadata(clonedMetadata, Object.assign(fakeMetadata, { dataset: newDataset }));
+    });
+
+    it('Cloning dataset metadata while being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
         const newDataset = 'test123';
         const fakeMetadata = await new Metadata(createMetadata()).save();
         const response = await requester

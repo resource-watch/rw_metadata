@@ -1,21 +1,32 @@
+const Metadata = require('models/metadata.model');
 const nock = require('nock');
 const chai = require('chai');
-const MetadataModel = require('models/metadata.model');
+const { ROLES } = require('./utils/test.constants');
+const { getTestServer } = require('./utils/test-server');
+const { createMetadataResourceForUpdate, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const {
-    ROLES
-} = require('./utils/test.constants');
+    validateMetadata, ensureCorrectError, initHelpers, createMetadata
+} = require('./utils/helpers');
 
 chai.should();
 
-const {
-    validateMetadata, deserializeDataset, createMetadata, createMetadataInDB
-} = require('./utils/helpers');
-const { getTestServer } = require('./utils/test-server');
-
 const requester = getTestServer();
+const DEFAULT = {
+    widgetID: 'test123',
+    datasetID: 'test123',
+};
+const helpers = initHelpers(
+    requester,
+    `/api/v1/dataset/${DEFAULT.datasetID}/metadata`,
+    'patch',
+    createMetadataResourceForUpdate('dataset')
+);
+
+const updateDataset = (data = createMetadataResourceForUpdate('dataset'), datasetID = DEFAULT.datasetID) => requester
+    .patch(`/api/v1/dataset/${datasetID}/metadata`)
+    .send({ ...data, loggedUser: ROLES.ADMIN });
 
 describe('Update dataset metadata endpoint', () => {
-
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -23,114 +34,50 @@ describe('Update dataset metadata endpoint', () => {
 
         nock.cleanAll();
 
-        await MetadataModel.deleteMany({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
-    it('Create metadata for a dataset', async () => {
-        const fakeMetadataOne = createMetadata();
-        const fakeMetadataTwo = createMetadata();
-        const fakeMetadataThree = createMetadata();
+    it('Update dataset metadata without being authenticated should fail', helpers.isTokenRequired());
 
-        const metadatas = [fakeMetadataOne, fakeMetadataTwo, fakeMetadataThree];
+    it('Update dataset metadata while being authenticated as USER should fail', helpers.isUserForbidden());
 
-        metadatas.forEach(async (metadata) => {
-            const response = await requester
-                .post(`/api/v1/dataset/${metadata.dataset}/metadata`)
-                .send({ ...metadata, loggedUser: ROLES.ADMIN });
-            const createdDataset = deserializeDataset(response)[0];
+    it('Update dataset metadata while being authenticated as MANAGER with the wrong app should fail', helpers.isManagerWithWrongAppForbidden());
 
-            response.status.should.equal(200);
-            response.body.should.have.property('data').and.be.a('array');
+    it('Update dataset metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
-            validateMetadata(createdDataset, metadata);
-        });
+    it('Update dataset metadata with wrong data, should return error which specified in constant', async () => {
+        await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
+            const defaultMetadata = createMetadataResourceForUpdate('dataset');
+            const dataset = await updateDataset({ ...defaultMetadata, ...data });
+            dataset.status.should.equal(400);
+            ensureCorrectError(dataset.body, expectedError);
+        }));
     });
 
-    it('Update metadata for a dataset should return a 200 HTTP code with the updated data (happy case)', async () => {
-        const fakeMetadataOne = await createMetadataInDB();
+    it('Update dataset metadata while being authenticated as MANAGER with right application should succeed (happy case)', async () => {
+        const metadata = await new Metadata(createMetadata('dataset')).save();
+        const defaultDataset = createMetadataResourceForUpdate('dataset', metadata.resource.id);
 
-        const response = await requester
-            .patch(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
-            .send({
-                language: fakeMetadataOne.language,
-                application: fakeMetadataOne.application,
-                loggedUser: ROLES.ADMIN
-            });
+        const dataset = await requester
+            .patch(`/api/v1/dataset/${metadata.dataset}/metadata`)
+            .send({ ...defaultDataset, loggedUser: ROLES.MANAGER });
 
-        response.status.should.equal(200);
-        response.body.should.have.property('data').and.be.a('array');
-
-        const createdDataset = deserializeDataset(response)[0];
-
-        const updatedDatasetOne = { ...fakeMetadataOne.toObject(), dataset: fakeMetadataOne.dataset };
-        validateMetadata(createdDataset, updatedDatasetOne);
+        validateMetadata(dataset.body.data[0], { ...defaultDataset, dataset: metadata.dataset });
     });
 
-    it('Update metadata with empty fields for a dataset should return a 200 HTTP code with the updated data', async () => {
-        const fakeMetadataOne = await createMetadataInDB();
+    it('Update dataset metadata while being authenticated as ADMIN with right application should succeed (happy case)', async () => {
+        const metadata = await new Metadata(createMetadata('dataset')).save();
+        const defaultDataset = createMetadataResourceForUpdate('dataset', metadata.resource.id);
 
-        const response = await requester
-            .patch(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
-            .send({
-                language: fakeMetadataOne.language,
-                application: fakeMetadataOne.application,
-                loggedUser: ROLES.ADMIN,
-                description: '',
-                source: '',
-                citation: '',
-                license: ''
-            });
+        const dataset = await requester
+            .patch(`/api/v1/dataset/${metadata.dataset}/metadata`)
+            .send({ ...defaultDataset, loggedUser: ROLES.ADMIN });
 
-        response.status.should.equal(200);
-        response.body.should.have.property('data').and.be.a('array');
-
-        const responseDataset = deserializeDataset(response)[0];
-
-        const expectedDataset = {
-            ...fakeMetadataOne.toObject(),
-            dataset: fakeMetadataOne.dataset,
-            description: '',
-            source: '',
-            citation: '',
-            license: ''
-        };
-
-        validateMetadata(responseDataset, expectedDataset);
-    });
-
-    it('Delete metadata for a dataset', async () => {
-        const fakeMetadataOne = await createMetadataInDB();
-        const fakeMetadataTwo = await createMetadataInDB();
-
-        const responseOne = await requester
-            .delete(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`)
-            .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
-            .send();
-
-        responseOne.status.should.equal(200);
-        responseOne.body.should.have.property('data').and.be.a('array');
-
-        const loadedDatasetOne = deserializeDataset(responseOne)[0];
-
-        validateMetadata(loadedDatasetOne, fakeMetadataOne.toObject());
-
-
-        const responseTwo = await requester
-            .delete(`/api/v1/dataset/${fakeMetadataTwo.dataset}/metadata`)
-            .query({ language: 'en', application: 'rw', loggedUser: JSON.stringify(ROLES.ADMIN) })
-            .send();
-
-        responseTwo.status.should.equal(200);
-        responseTwo.body.should.have.property('data').and.be.a('array');
-
-        const loadedDatasetTwo = deserializeDataset(responseTwo)[0];
-
-        validateMetadata(loadedDatasetTwo, fakeMetadataTwo);
+        validateMetadata(dataset.body.data[0], { ...defaultDataset, dataset: metadata.dataset });
     });
 
     afterEach(async () => {
-        await MetadataModel.deleteMany({}).exec();
-
+        await Metadata.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

@@ -41,9 +41,11 @@ describe('Create layer metadata endpoint', () => {
 
     it('Creating a layer metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('Creating a layer metadata being authenticated as USER should fail', helpers.isUserForbidden());
+    it('Creating a layer metadata while being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('Creating a layer metadata being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
+    it('Creating a layer metadata while being authenticated as MANAGER with the wrong app should fail', helpers.isManagerWithWrongAppForbidden());
+
+    it('Creating a layer metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
     it('Creating a layer metadata with wrong data, should return error which specified in constant', async () => {
         await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
@@ -54,9 +56,26 @@ describe('Create layer metadata endpoint', () => {
         }));
     });
 
-    it('Creating a layer metadata should success', async () => {
+    it('Creating a layer metadata while being authenticated as MANAGER with the right application should succeed (happy case)', async () => {
         const defaultWidget = createMetadataResource('layer');
-        const layer = await createLayer(defaultWidget);
+
+        const { widgetID, datasetID } = DEFAULT;
+
+        const layer = await requester
+            .post(`/api/v1/dataset/${datasetID}/layer/${widgetID}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
+
+        validateMetadata(layer.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
+    });
+
+    it('Creating a layer metadata while being authenticated as ADMIN with the right application should succeed (happy case)', async () => {
+        const defaultWidget = createMetadataResource('layer');
+
+        const { widgetID, datasetID } = DEFAULT;
+
+        const layer = await requester
+            .post(`/api/v1/dataset/${datasetID}/layer/${widgetID}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
 
         validateMetadata(layer.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });

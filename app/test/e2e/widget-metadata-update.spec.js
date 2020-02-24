@@ -39,9 +39,11 @@ describe('Update widget metadata endpoint', () => {
 
     it('Updating widget metadata without being authenticated should fail', helpers.isTokenRequired());
 
-    it('Updating widget metadata being authenticated as USER should fail', helpers.isUserForbidden());
+    it('Updating widget metadata while being authenticated as USER should fail', helpers.isUserForbidden());
 
-    it('Updating widget metadata being authenticated as ADMIN but with wrong application should fail', helpers.isRightAppRequired());
+    it('Updating widget metadata while being authenticated as MANAGER with the wrong app should fail', helpers.isManagerWithWrongAppForbidden());
+
+    it('Updating widget metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
     it('Updating widget metadata with wrong data, should return error which specified in constant', async () => {
         await Promise.all(COMMON_AUTH_ERROR_CASES.map(async ({ data, expectedError }) => {
@@ -52,10 +54,25 @@ describe('Update widget metadata endpoint', () => {
         }));
     });
 
-    it('Updating widget metadata should success', async () => {
+    it('Updating widget metadata while being authenticated as MANAGER should succeed (happy case)', async () => {
         const metadata = await new Metadata(createMetadata('widget')).save();
         const defaultWidget = createMetadataResourceForUpdate('widget', metadata.resource.id);
-        const widget = await updateWidget(defaultWidget, metadata.dataset);
+
+        const widget = await requester
+            .patch(`/api/v1/dataset/${metadata.dataset}/widget/${defaultWidget.resource.id}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.MANAGER });
+
+        validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: metadata.dataset });
+    });
+
+    it('Updating widget metadata while being authenticated as ADMIN should succeed (happy case)', async () => {
+        const metadata = await new Metadata(createMetadata('widget')).save();
+        const defaultWidget = createMetadataResourceForUpdate('widget', metadata.resource.id);
+
+        const widget = await requester
+            .patch(`/api/v1/dataset/${metadata.dataset}/widget/${defaultWidget.resource.id}/metadata`)
+            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
+
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: metadata.dataset });
     });
 
