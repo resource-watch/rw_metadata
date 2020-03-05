@@ -1,11 +1,14 @@
 const Metadata = require('models/metadata.model');
 const nock = require('nock');
-const { getTestServer } = require('./test-server');
-const { createMetadata, validateMetadata } = require('./utils');
+const chai = require('chai');
+const { getTestServer } = require('./utils/test-server');
+const { createMetadata, validateMetadata } = require('./utils/helpers');
+
+chai.should();
 
 const requester = getTestServer();
 
-describe('METADATA LAYER GET endpoint', () => {
+describe('Get layer metadata endpoint', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -13,7 +16,7 @@ describe('METADATA LAYER GET endpoint', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
     it('should return empty array without creating metadata', async () => {
@@ -30,8 +33,8 @@ describe('METADATA LAYER GET endpoint', () => {
         validateMetadata(response.body.data[0], fakeMetadata);
     });
 
-    afterEach(() => {
-        Metadata.remove({}).exec();
+    afterEach(async () => {
+        await Metadata.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

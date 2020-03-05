@@ -107,7 +107,7 @@ class MetadataRouter {
         logger.info('Getting all metadata');
         const filter = {};
         const extendedFilter = {};
-        filter.search = ctx.query.search ? ctx.query.search.split(' ').map(elem => elem.trim()) : [];
+        filter.search = ctx.query.search ? ctx.query.search.split(' ').map((elem) => elem.trim()) : [];
         if (ctx.query.application) { filter.application = ctx.query.application; }
         if (ctx.query.language) { filter.language = ctx.query.language; }
         if (ctx.query.limit) { filter.limit = ctx.query.limit; }
@@ -136,7 +136,7 @@ class MetadataRouter {
             ids: ctx.request.body.ids
         };
         if (typeof resource.ids === 'string') {
-            resource.ids = resource.ids.split(',').map(elem => elem.trim());
+            resource.ids = resource.ids.split(',').map((elem) => elem.trim());
         }
         resource.type = MetadataRouter.getResourceTypeByPath(ctx.path);
         const filter = {};
@@ -169,7 +169,7 @@ class MetadataRouter {
 // Negative checking
 const authorizationMiddleware = async (ctx, next) => {
     // Get user from query (delete) or body (post-patch)
-    const user = Object.assign({}, ctx.request.query.loggedUser ? JSON.parse(ctx.request.query.loggedUser) : {}, ctx.request.body.loggedUser);
+    const user = { ...(ctx.request.query.loggedUser ? JSON.parse(ctx.request.query.loggedUser) : {}), ...ctx.request.body.loggedUser };
     if (user.id === 'microservice') {
         await next();
         return;

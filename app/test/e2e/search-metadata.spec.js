@@ -1,13 +1,12 @@
-/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiDatetime = require('chai-datetime');
 const Metadata = require('models/metadata.model');
+const { validateMetadata, deserializeDataset, createMetadata } = require('./utils/helpers');
+const { getTestServer } = require('./utils/test-server');
 
-const should = chai.should();
-const { validateMetadata, deserializeDataset, createMetadata } = require('./utils');
-const { getTestServer } = require('./test-server');
+chai.should();
 
 const requester = getTestServer();
 
@@ -26,7 +25,7 @@ describe('Search metadata', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
 
         const metadataOne = createMetadata();
         const metadataTwo = createMetadata();
@@ -146,7 +145,7 @@ describe('Search metadata', () => {
         validateMetadata(loadedDatasetTwo, fakeMetadataOne);
         validateMetadata(loadedDatasetThree, fakeMetadataTwo);
 
-        await Metadata.remove({ _id: fakeMetadataThree.id }).exec();
+        await Metadata.deleteMany({ _id: fakeMetadataThree.id }).exec();
     });
 
     it('Search for metadata by keyword and sort by relevance non-specified should prioritize results according to weight - test name weight > 2x description weight', async () => {
@@ -219,6 +218,6 @@ describe('Search metadata', () => {
     });
 
     after(async () => {
-        Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 });

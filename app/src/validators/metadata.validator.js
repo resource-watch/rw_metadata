@@ -71,13 +71,13 @@ class MetadataValidator {
 
     static validate(koaObj) {
         logger.info('Validating Metadata Creation');
-        koaObj.checkBody('language').notEmpty().check(lang => MetadataValidator.isString(lang)).toLow();
-        koaObj.checkBody('application').notEmpty().check(application => MetadataValidator.notEmptyString(application));
-        koaObj.checkBody('name').optional().check(name => MetadataValidator.isString(name), 'should be a valid string');
-        koaObj.checkBody('description').optional().check(description => MetadataValidator.isString(description), 'should be a valid string');
-        koaObj.checkBody('source').optional().check(source => MetadataValidator.isString(source), 'should be a valid string');
-        koaObj.checkBody('citation').optional().check(citation => MetadataValidator.isString(citation), 'should be a valid string');
-        koaObj.checkBody('license').optional().check(license => MetadataValidator.isString(license), 'should be a valid string');
+        koaObj.checkBody('language').notEmpty().check((lang) => MetadataValidator.isString(lang)).toLow();
+        koaObj.checkBody('application').notEmpty().check((application) => MetadataValidator.notEmptyString(application));
+        koaObj.checkBody('name').optional().check((name) => MetadataValidator.isString(name), 'should be a valid string');
+        koaObj.checkBody('description').optional().check((description) => MetadataValidator.isString(description), 'should be a valid string');
+        koaObj.checkBody('source').optional().check((source) => MetadataValidator.isString(source), 'should be a valid string');
+        koaObj.checkBody('citation').optional().check((citation) => MetadataValidator.isString(citation), 'should be a valid string');
+        koaObj.checkBody('license').optional().check((license) => MetadataValidator.isString(license), 'should be a valid string');
         koaObj.checkBody('units').optional().check((units) => {
             if (MetadataValidator.isObject(units)) {
                 return true;
@@ -98,10 +98,13 @@ class MetadataValidator {
         }, 'should be a valid object');
         if (koaObj.application) {
             koaObj.checkBody('applicationProperties').optional()
-                .check(applicationProperties => MetadataValidator.checkApplicationProperties(applicationProperties, koaObj), `Required fields - ${Object.keys(METADATA_FIELDS[koaObj.request.body.application])}`);
+                .check(
+                    (applicationProperties) => MetadataValidator.checkApplicationProperties(applicationProperties, koaObj),
+                    `Required fields - ${Object.keys(METADATA_FIELDS[koaObj.request.body.application])}`
+                );
         }
         if (koaObj.errors) {
-            logger.error('Error validating metadata creation');
+            logger.info('Error validating metadata creation');
             throw new MetadataNotValid(koaObj.errors);
         }
         return true;
@@ -111,7 +114,7 @@ class MetadataValidator {
         logger.info('Validating Metadata Cloning');
         koaObj.checkBody('newDataset').notEmpty().toLow();
         if (koaObj.errors) {
-            logger.error('Error validating metadata cloning');
+            logger.info('Error validating metadata cloning');
             throw new CloneNotValid(koaObj.errors);
         }
         return true;

@@ -1,19 +1,19 @@
-FROM node:12.11-alpine
+FROM node:12-alpine
 MAINTAINER info@vizzuality.com
 
 ENV NAME rw-metadata
-ENV USER microservice
+ENV USER rw-metadata
 
 RUN apk update && apk upgrade && \
     apk add --no-cache --update bash git openssh python alpine-sdk
 
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
-RUN npm install -g grunt-cli bunyan
+RUN yarn global add grunt-cli bunyan
 
 RUN mkdir -p /opt/$NAME
 COPY package.json /opt/$NAME/package.json
-RUN cd /opt/$NAME && npm install
+RUN cd /opt/$NAME && yarn
 
 COPY entrypoint.sh /opt/$NAME/entrypoint.sh
 COPY config /opt/$NAME/config

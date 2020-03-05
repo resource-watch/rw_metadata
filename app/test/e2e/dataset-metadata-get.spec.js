@@ -1,24 +1,20 @@
-/* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const chaiDatetime = require('chai-datetime');
 const Metadata = require('models/metadata.model');
 
-const should = chai.should();
+chai.should();
 
-const { validateMetadata, deserializeDataset, createMetadata } = require('./utils');
-const { getTestServer } = require('./test-server');
+const { validateMetadata, deserializeDataset, createMetadata } = require('./utils/helpers');
+const { getTestServer } = require('./utils/test-server');
 
 const requester = getTestServer();
 
 chai.use(chaiHttp);
 chai.use(chaiDatetime);
 
-let fakeMetadataOne = null;
-let fakeMetadataTwo = null;
-
-describe('Access metadata', () => {
+describe('Get dataset metadata', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -26,12 +22,12 @@ describe('Access metadata', () => {
 
         nock.cleanAll();
 
-        Metadata.remove({}).exec();
+        await Metadata.deleteMany({}).exec();
     });
 
     it('Get metadata for a single dataset', async () => {
-        fakeMetadataOne = await new Metadata(createMetadata()).save();
-        fakeMetadataTwo = await new Metadata(createMetadata()).save();
+        const fakeMetadataOne = await new Metadata(createMetadata()).save();
+        await new Metadata(createMetadata()).save();
 
         const response = await requester
             .get(`/api/v1/dataset/${fakeMetadataOne.dataset}/metadata`);
@@ -47,6 +43,10 @@ describe('Access metadata', () => {
     });
 
     it('Get metadata for multiple datasets', async () => {
+        const fakeMetadataOne = await new Metadata(createMetadata()).save();
+        const fakeMetadataTwo = await new Metadata(createMetadata()).save();
+
+
         const response = await requester
             .get(`/api/v1/metadata`);
         response.status.should.equal(200);
@@ -63,13 +63,11 @@ describe('Access metadata', () => {
         validateMetadata(loadedDatasetTwo, fakeMetadataTwo);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await Metadata.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
-    });
-
-    after(async () => {
-        Metadata.remove({}).exec();
     });
 });

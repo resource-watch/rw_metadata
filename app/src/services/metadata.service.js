@@ -1,4 +1,5 @@
 const logger = require('logger');
+const isNil = require('lodash/isNil');
 const Metadata = require('models/metadata.model');
 const MetadataNotFound = require('errors/metadataNotFound.error');
 const MetadataDuplicated = require('errors/metadataDuplicated.error');
@@ -101,12 +102,13 @@ class MetadataService {
             logger.error('Error updating metadata');
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
         }
+
         logger.debug('Updating metadata');
         metadata.name = body.name ? body.name : metadata.name;
-        metadata.description = body.description ? body.description : metadata.description;
-        metadata.source = body.source ? body.source : metadata.source;
-        metadata.citation = body.citation ? body.citation : metadata.citation;
-        metadata.license = body.license ? body.license : metadata.license;
+        metadata.description = !isNil(body.description) ? body.description : metadata.description;
+        metadata.source = !isNil(body.source) ? body.source : metadata.source;
+        metadata.citation = !isNil(body.citation) ? body.citation : metadata.citation;
+        metadata.license = !isNil(body.license) ? body.license : metadata.license;
         metadata.info = body.info ? body.info : metadata.info;
         metadata.columns = body.columns ? body.columns : metadata.columns;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
@@ -127,7 +129,7 @@ class MetadataService {
             throw new MetadataNotFound(`Metadata of resource ${resource.type}: ${resource.id} doesn't exist`);
         }
         logger.debug('Deleting metadata');
-        await Metadata.remove(finalQuery).exec();
+        await Metadata.deleteMany(finalQuery).exec();
         return metadata;
     }
 
@@ -163,12 +165,8 @@ class MetadataService {
 
         const limit = (Number.isNaN(parseInt(filter.limit, 10))) ? 0 : parseInt(filter.limit, 10);
         logger.debug('Getting metadata');
-        try {
-            const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
-            return result;
-        } catch (err) {
-            throw err;
-        }
+        const result = await Metadata.find(finalFilter, projection, options).limit(limit).exec();
+        return result;
     }
 
     static async getByIds(resource, filter) {
@@ -185,18 +183,14 @@ class MetadataService {
     static async clone(user, dataset, resource, body) {
         logger.debug('Checking if metadata exists');
         let metadatas = await MetadataService.get(dataset, resource, {});
-        metadatas = metadatas.map(metadata => metadata.toObject());
+        metadatas = metadatas.map((metadata) => metadata.toObject());
         if (metadatas.length === 0) {
             throw new MetadataNotFound(`No metadata of resource ${resource.type}: ${resource.id}`);
         }
-        try {
-            return await MetadataService.createSome(user, metadatas, body.newDataset, {
-                type: 'dataset',
-                id: body.newDataset
-            });
-        } catch (err) {
-            throw err;
-        }
+        return MetadataService.createSome(user, metadatas, body.newDataset, {
+            type: 'dataset',
+            id: body.newDataset
+        });
     }
 
     /*

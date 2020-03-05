@@ -6,20 +6,18 @@ services:
     environment:
       CT_REGISTER_MODE: auto
       NODE_ENV: test
-      DEBUG: "*"
       PORT: 5005
       API_VERSION: v1
       LOCAL_URL: http://127.0.0.1:5005
       CT_URL: http://127.0.0.1:9000
       CT_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
-      MONGO_PORT_27017_TCP_ADDR: rw-metadata-mongo-test
-      MONGO_PORT_27017_TCP_DATABASE: metadata_db_test
+      MONGO_PORT_27017_TCP_ADDR: mongo
     command: test
-    links:
-    - mongo
+    depends_on:
+      - mongo
+
   mongo:
     image: mongo:3.4
-    container_name: rw-metadata-mongo-test
+    command: --smallfiles
     ports:
-    - "27017"
-    restart: always
+      - "27017"
