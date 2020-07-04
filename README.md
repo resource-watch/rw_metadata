@@ -18,6 +18,11 @@ Execution using Docker requires:
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
+Dependencies on other Microservices:
+- [Dataset](https://github.com/resource-watch/dataset/)
+- [Layer](https://github.com/resource-watch/layer)
+- [Widget](https://github.com/resource-watch/widget)
+
 ## Getting started
 
 Start by cloning the repository from github to your execution environment
