@@ -111,6 +111,7 @@ class MetadataService {
         metadata.license = !isNil(body.license) ? body.license : metadata.license;
         metadata.info = body.info ? body.info : metadata.info;
         metadata.columns = body.columns ? body.columns : metadata.columns;
+        metadata.status = body.status ? body.status : metadata.status;
         metadata.applicationProperties = body.applicationProperties ? body.applicationProperties : metadata.applicationProperties;
         metadata.updatedAt = new Date();
         return metadata.save();

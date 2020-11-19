@@ -1,3 +1,7 @@
+## 19/11/2020
+
+- Fix issue where metadata status could not be updated.
+
 # v1.0.1
 
 ## 09/04/2020
