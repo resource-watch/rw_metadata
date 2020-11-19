@@ -92,7 +92,7 @@ const createMetadataResource = (type, resourceID = Math.random().toString(36).su
     status: 'published'
 });
 
-const createMetadataResourceForUpdate = (type, resourceID = Math.random().toString(36).substring(7)) => ({
+const createMetadataResourceForUpdate = (type, resourceID = Math.random().toString(36).substring(7), additionalData = {}) => ({
     application: 'rw',
     resource: {
         id: resourceID,
@@ -117,7 +117,8 @@ const createMetadataResourceForUpdate = (type, resourceID = Math.random().toStri
     applicationProperties: {
         hoo: 'iar update'
     },
-    status: 'published'
+    status: 'unpublished',
+    ...additionalData
 });
 
 module.exports = {
