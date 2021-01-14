@@ -4,7 +4,7 @@ const chai = require('chai');
 const { expect } = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
-const { initHelpers, createMetadata } = require('./utils/helpers');
+const { initHelpers, createMetadata, mockGetUserFromToken } = require('./utils/helpers');
 
 chai.should();
 
@@ -41,14 +41,15 @@ describe('Delete widget metadata endpoint', () => {
     it('Deleting widget while metadata being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
     it('Deleting widget while metadata being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const metadata = await new Metadata(createMetadata('widget')).save();
 
         const response = await requester
             .delete(`/api/v1/dataset/${metadata.dataset}/widget/${metadata.resource.id}/metadata`)
+            .set('Authorization', `Bearer abcd`)
             .query({
                 language: 'en',
                 application: 'rw',
-                loggedUser: JSON.stringify(ROLES.MANAGER)
             })
             .send();
 
@@ -59,14 +60,15 @@ describe('Delete widget metadata endpoint', () => {
     });
 
     it('Deleting widget while metadata being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const metadata = await new Metadata(createMetadata('widget')).save();
 
         const response = await requester
             .delete(`/api/v1/dataset/${metadata.dataset}/widget/${metadata.resource.id}/metadata`)
+            .set('Authorization', `Bearer abcd`)
             .query({
                 language: 'en',
                 application: 'rw',
-                loggedUser: JSON.stringify(ROLES.ADMIN)
             })
             .send();
 

@@ -5,7 +5,7 @@ const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const { createMetadataResourceForUpdate, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const {
-    validateMetadata, ensureCorrectError, initHelpers, createMetadata
+    validateMetadata, ensureCorrectError, initHelpers, createMetadata, mockGetUserFromToken
 } = require('./utils/helpers');
 
 chai.should();
@@ -22,9 +22,14 @@ const helpers = initHelpers(
     createMetadataResourceForUpdate('dataset')
 );
 
-const updateDataset = (data = createMetadataResourceForUpdate('dataset'), datasetID = DEFAULT.datasetID) => requester
-    .patch(`/api/v1/dataset/${datasetID}/metadata`)
-    .send({ ...data, loggedUser: ROLES.ADMIN });
+const updateDataset = (data = createMetadataResourceForUpdate('dataset'), datasetID = DEFAULT.datasetID) => {
+    mockGetUserFromToken(ROLES.ADMIN);
+
+    return requester
+        .patch(`/api/v1/dataset/${datasetID}/metadata`)
+        .set('Authorization', `Bearer abcd`)
+        .send(data);
+};
 
 describe('Update dataset metadata endpoint', () => {
     before(async () => {
@@ -55,23 +60,27 @@ describe('Update dataset metadata endpoint', () => {
     });
 
     it('Update dataset metadata while being authenticated as MANAGER with right application should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const metadata = await new Metadata(createMetadata('dataset')).save();
         const defaultDataset = createMetadataResourceForUpdate('dataset', metadata.resource.id);
 
         const dataset = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/metadata`)
-            .send({ ...defaultDataset, loggedUser: ROLES.MANAGER });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultDataset);
 
         validateMetadata(dataset.body.data[0], { ...defaultDataset, dataset: metadata.dataset });
     });
 
     it('Update dataset metadata while being authenticated as ADMIN with right application should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const metadata = await new Metadata(createMetadata('dataset')).save();
         const defaultDataset = createMetadataResourceForUpdate('dataset', metadata.resource.id);
 
         const dataset = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/metadata`)
-            .send({ ...defaultDataset, loggedUser: ROLES.ADMIN });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultDataset);
 
         validateMetadata(dataset.body.data[0], { ...defaultDataset, dataset: metadata.dataset });
     });

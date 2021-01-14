@@ -1,5 +1,6 @@
 const MetadataModel = require('models/metadata.model');
 const clone = require('lodash/clone');
+const nock = require('nock');
 const { ROLES } = require('./test.constants');
 
 function deserializeDataset(response) {
@@ -31,17 +32,20 @@ const ensureCorrectError = (body, errMessage) => {
 
 const getUUID = () => Math.random().toString(36).substring(7);
 
+const mockGetUserFromToken = (userProfile) => {
+    nock(process.env.CT_URL, { reqheaders: { authorization: 'Bearer abcd' } })
+        .get('/auth/user/me')
+        .reply(200, userProfile);
+};
+
 const initHelpers = (requester, url, initMethod, initialData = {}, queryParams = { language: 'en' }) => {
     const isUserForbidden = (method = initMethod) => async () => {
         const query = clone(queryParams);
 
-        if (['delete', 'get'].includes(method.toLowerCase())) {
-            query.loggedUser = JSON.stringify(ROLES.USER);
-        } else {
-            initialData.loggedUser = ROLES.USER;
-        }
+        mockGetUserFromToken(ROLES.USER);
 
         const response = await requester[method](url)
+            .set('Authorization', `Bearer abcd`)
             .query(query)
             .send(initialData);
 
@@ -53,14 +57,11 @@ const initHelpers = (requester, url, initMethod, initialData = {}, queryParams =
         const query = clone(queryParams);
         query.application = 'test123';
 
-        if (['delete', 'get'].includes(method.toLowerCase())) {
-            query.loggedUser = JSON.stringify(ROLES.MANAGER);
-        } else {
-            initialData.loggedUser = ROLES.MANAGER;
-        }
+        mockGetUserFromToken(ROLES.MANAGER);
 
         const response = await requester[method](url)
             .query(query)
+            .set('Authorization', `Bearer abcd`)
             .send(initialData);
 
         response.status.should.equal(403);
@@ -72,14 +73,12 @@ const initHelpers = (requester, url, initMethod, initialData = {}, queryParams =
             language: 'en',
             application: 'test123'
         };
-        if (['delete', 'get'].includes(method.toLowerCase())) {
-            query.loggedUser = JSON.stringify(ROLES.ADMIN);
-        } else {
-            initialData.loggedUser = ROLES.ADMIN;
-        }
+
+        mockGetUserFromToken(ROLES.ADMIN);
 
         const response = await requester[method](url)
             .query(query)
+            .set('Authorization', `Bearer abcd`)
             .send(initialData);
 
         response.status.should.equal(403);
@@ -140,6 +139,7 @@ const createMetadata = (type) => {
 
 const createMetadataInDB = async () => (MetadataModel(createMetadata()).save());
 
+
 module.exports = {
     deserializeDataset,
     validateMetadata,
@@ -147,5 +147,6 @@ module.exports = {
     createMetadataInDB,
     initHelpers,
     getUUID,
-    ensureCorrectError
+    ensureCorrectError,
+    mockGetUserFromToken
 };

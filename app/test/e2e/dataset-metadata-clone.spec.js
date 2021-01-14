@@ -4,7 +4,7 @@ const chai = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const {
-    validateMetadata, deserializeDataset, createMetadata, ensureCorrectError, initHelpers
+    validateMetadata, deserializeDataset, createMetadata, ensureCorrectError, initHelpers, mockGetUserFromToken
 } = require('./utils/helpers');
 
 chai.should();
@@ -43,22 +43,26 @@ describe('Clone dataset metadata endpoint', () => {
     });
 
     it('Cloning dataset metadata while being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const newDataset = 'test123';
         const fakeMetadata = await new Metadata(createMetadata()).save();
         const response = await requester
             .post(`/api/v1/dataset/${fakeMetadata.dataset}/metadata/clone`)
-            .send({ newDataset, loggedUser: ROLES.MANAGER, application: 'rw' });
+            .set('Authorization', `Bearer abcd`)
+            .send({ newDataset, application: 'rw' });
 
         const clonedMetadata = deserializeDataset(response)[0];
         validateMetadata(clonedMetadata, Object.assign(fakeMetadata, { dataset: newDataset }));
     });
 
     it('Cloning dataset metadata while being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const newDataset = 'test123';
         const fakeMetadata = await new Metadata(createMetadata()).save();
         const response = await requester
             .post(`/api/v1/dataset/${fakeMetadata.dataset}/metadata/clone`)
-            .send({ newDataset, loggedUser: ROLES.ADMIN, application: 'rw' });
+            .set('Authorization', `Bearer abcd`)
+            .send({ newDataset, application: 'rw' });
 
         const clonedMetadata = deserializeDataset(response)[0];
         validateMetadata(clonedMetadata, Object.assign(fakeMetadata, { dataset: newDataset }));
