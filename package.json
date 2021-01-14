@@ -51,7 +51,7 @@
     "koa-validate": "1.0.7",
     "lodash": "^4.17.20",
     "mongoose": "^5.4.11",
-    "sd-ct-register-microservice-node": "^2.1.7",
+    "rw-api-microservice-node": "^3.2.1",
     "sleep": "^6.1.0"
   },
   "devDependencies": {
