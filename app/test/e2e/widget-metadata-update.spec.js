@@ -5,7 +5,7 @@ const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const { createMetadataResourceForUpdate, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const {
-    validateMetadata, ensureCorrectError, initHelpers, createMetadata
+    validateMetadata, ensureCorrectError, initHelpers, createMetadata, mockGetUserFromToken
 } = require('./utils/helpers');
 
 chai.should();
@@ -22,9 +22,13 @@ const helpers = initHelpers(
     createMetadataResourceForUpdate('widget')
 );
 
-const updateWidget = (data = createMetadataResourceForUpdate('widget'), datasetID = DEFAULT.datasetID) => requester
-    .patch(`/api/v1/dataset/${datasetID}/widget/${data.resource.id}/metadata`)
-    .send({ ...data, loggedUser: ROLES.ADMIN });
+const updateWidget = (data = createMetadataResourceForUpdate('widget'), datasetID = DEFAULT.datasetID) => {
+    mockGetUserFromToken(ROLES.ADMIN);
+    return requester
+        .patch(`/api/v1/dataset/${datasetID}/widget/${data.resource.id}/metadata`)
+        .set('Authorization', `Bearer abcd`)
+        .send(data);
+};
 
 describe('Update widget metadata endpoint', () => {
     before(async () => {
@@ -55,23 +59,27 @@ describe('Update widget metadata endpoint', () => {
     });
 
     it('Updating widget metadata while being authenticated as MANAGER should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const metadata = await new Metadata(createMetadata('widget')).save();
         const defaultWidget = createMetadataResourceForUpdate('widget', metadata.resource.id);
 
         const widget = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/widget/${defaultWidget.resource.id}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.MANAGER });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: metadata.dataset });
     });
 
     it('Updating widget metadata while being authenticated as ADMIN should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const metadata = await new Metadata(createMetadata('widget')).save();
         const defaultWidget = createMetadataResourceForUpdate('widget', metadata.resource.id);
 
         const widget = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/widget/${defaultWidget.resource.id}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: metadata.dataset });
     });

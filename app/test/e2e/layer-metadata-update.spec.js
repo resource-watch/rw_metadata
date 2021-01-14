@@ -5,7 +5,7 @@ const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const { createMetadataResourceForUpdate, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
 const {
-    validateMetadata, ensureCorrectError, initHelpers, createMetadata
+    validateMetadata, ensureCorrectError, initHelpers, createMetadata, mockGetUserFromToken
 } = require('./utils/helpers');
 
 chai.should();
@@ -22,9 +22,14 @@ const helpers = initHelpers(
     createMetadataResourceForUpdate('layer')
 );
 
-const updateLayer = (data = createMetadataResourceForUpdate('layer'), datasetID = DEFAULT.datasetID) => requester
-    .patch(`/api/v1/dataset/${datasetID}/layer/${data.resource.id}/metadata`)
-    .send({ ...data, loggedUser: ROLES.ADMIN });
+const updateLayer = (data = createMetadataResourceForUpdate('layer'), datasetID = DEFAULT.datasetID) => {
+    mockGetUserFromToken(ROLES.ADMIN);
+
+    return requester
+        .patch(`/api/v1/dataset/${datasetID}/layer/${data.resource.id}/metadata`)
+        .set('Authorization', `Bearer abcd`)
+        .send(data);
+};
 
 describe('Update layer metadata endpoint', () => {
     before(async () => {
@@ -55,23 +60,27 @@ describe('Update layer metadata endpoint', () => {
     });
 
     it('Update layer metadata while being authenticated as MANAGER with right application should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const metadata = await new Metadata(createMetadata('layer')).save();
         const defaultLayer = createMetadataResourceForUpdate('layer', metadata.resource.id);
 
         const layer = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/layer/${defaultLayer.resource.id}/metadata`)
-            .send({ ...defaultLayer, loggedUser: ROLES.MANAGER });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultLayer);
 
         validateMetadata(layer.body.data[0], { ...defaultLayer, dataset: metadata.dataset });
     });
 
     it('Update layer metadata while being authenticated as ADMIN with right application should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const metadata = await new Metadata(createMetadata('layer')).save();
         const defaultLayer = createMetadataResourceForUpdate('layer', metadata.resource.id);
 
         const layer = await requester
             .patch(`/api/v1/dataset/${metadata.dataset}/layer/${defaultLayer.resource.id}/metadata`)
-            .send({ ...defaultLayer, loggedUser: ROLES.ADMIN });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultLayer);
 
         validateMetadata(layer.body.data[0], { ...defaultLayer, dataset: metadata.dataset });
     });

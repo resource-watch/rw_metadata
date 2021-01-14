@@ -4,7 +4,9 @@ const chai = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const { createMetadataResource, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
-const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils/helpers');
+const {
+    validateMetadata, ensureCorrectError, initHelpers, mockGetUserFromToken
+} = require('./utils/helpers');
 
 chai.should();
 
@@ -20,11 +22,13 @@ const helpers = initHelpers(
 );
 
 const createDataset = (data = createMetadataResource('dataset')) => {
+    mockGetUserFromToken(ROLES.ADMIN);
     const { datasetID } = DEFAULT;
 
     return requester
         .post(`/api/v1/dataset/${datasetID}/metadata`)
-        .send({ ...data, loggedUser: ROLES.ADMIN });
+        .set('Authorization', `Bearer abcd`)
+        .send(data);
 };
 
 describe('Create metadata for dataset', () => {
@@ -56,25 +60,29 @@ describe('Create metadata for dataset', () => {
     });
 
     it('Creating dataset metadata being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const defaultWidget = createMetadataResource('dataset');
 
         const { datasetID } = DEFAULT;
 
         const dataset = await requester
             .post(`/api/v1/dataset/${datasetID}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.MANAGER });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(dataset.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });
 
     it('Creating dataset metadata being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const defaultWidget = createMetadataResource('dataset');
 
         const { datasetID } = DEFAULT;
 
         const dataset = await requester
             .post(`/api/v1/dataset/${datasetID}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(dataset.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });

@@ -4,7 +4,9 @@ const chai = require('chai');
 const { ROLES } = require('./utils/test.constants');
 const { getTestServer } = require('./utils/test-server');
 const { createMetadataResource, COMMON_AUTH_ERROR_CASES } = require('./utils/test.constants');
-const { validateMetadata, ensureCorrectError, initHelpers } = require('./utils/helpers');
+const {
+    validateMetadata, ensureCorrectError, initHelpers, mockGetUserFromToken
+} = require('./utils/helpers');
 
 chai.should();
 
@@ -21,11 +23,13 @@ const helpers = initHelpers(
 );
 
 const createWidget = (data = createMetadataResource('widget')) => {
+    mockGetUserFromToken(ROLES.ADMIN);
     const { widgetID, datasetID } = DEFAULT;
 
     return requester
         .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
-        .send({ ...data, loggedUser: ROLES.ADMIN });
+        .set('Authorization', `Bearer abcd`)
+        .send(data);
 };
 
 describe('Create widget metadata endpoint', () => {
@@ -57,25 +61,29 @@ describe('Create widget metadata endpoint', () => {
     });
 
     it('Create widget metadata while being authenticated as MANAGER with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.MANAGER);
         const defaultWidget = createMetadataResource('widget');
 
         const { widgetID, datasetID } = DEFAULT;
 
         const widget = await requester
             .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.MANAGER });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });
 
     it('Create widget metadata while being authenticated as ADMIN with the right app should succeed (happy case)', async () => {
+        mockGetUserFromToken(ROLES.ADMIN);
         const defaultWidget = createMetadataResource('widget');
 
         const { widgetID, datasetID } = DEFAULT;
 
         const widget = await requester
             .post(`/api/v1/dataset/${datasetID}/widget/${widgetID}/metadata`)
-            .send({ ...defaultWidget, loggedUser: ROLES.ADMIN });
+            .set('Authorization', `Bearer abcd`)
+            .send(defaultWidget);
 
         validateMetadata(widget.body.data[0], { ...defaultWidget, dataset: DEFAULT.datasetID });
     });
