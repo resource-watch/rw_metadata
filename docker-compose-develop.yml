@@ -15,7 +15,7 @@ services:
       API_VERSION: v1
       MONGO_PORT_27017_TCP_ADDR: mongo
       LOCAL_URL: http://mymachine:4000
-      FASTLY_ENABLED: false
+      FASTLY_ENABLED: "false"
     command: develop
     depends_on:
       - mongo
