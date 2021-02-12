@@ -37,7 +37,13 @@ describe('Clone dataset metadata endpoint', () => {
     it('Cloning dataset metadata while being authenticated as ADMIN but with wrong application should fail', helpers.isAdminWithWrongAppForbidden());
 
     it('Cloning dataset metadata without body should fail', async () => {
-        const response = await requester.post(`/api/v1/dataset/123/metadata/clone`).send();
+        mockGetUserFromToken(ROLES.MANAGER);
+
+        const response = await requester
+            .post(`/api/v1/dataset/123/metadata/clone`)
+            .set('Authorization', `Bearer abcd`)
+            .send();
+
         response.status.should.equal(400);
         ensureCorrectError(response.body, '- newDataset: newDataset can not be empty. - ');
     });

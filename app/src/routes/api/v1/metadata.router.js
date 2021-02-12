@@ -236,22 +236,35 @@ const cloneValidationMiddleware = async (ctx, next) => {
     await next();
 };
 
+const isAuthenticatedMiddleware = async (ctx, next) => {
+    logger.info(`Verifying if user is authenticated`);
+    const { query, body } = ctx.request;
+
+    const user = { ...(query.loggedUser ? JSON.parse(query.loggedUser) : {}), ...body.loggedUser };
+
+    if (!user || !user.id) {
+        ctx.throw(401, 'Unauthorized');
+        return;
+    }
+    await next();
+};
+
 // dataset
 router.get('/dataset/:dataset/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
-router.post('/dataset/:dataset/metadata/clone', cloneValidationMiddleware, authorizationMiddleware, MetadataRouter.clone);
-router.patch('/dataset/:dataset/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
-router.delete('/dataset/:dataset/metadata', authorizationMiddleware, MetadataRouter.delete);
+router.post('/dataset/:dataset/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.post('/dataset/:dataset/metadata/clone', isAuthenticatedMiddleware, cloneValidationMiddleware, authorizationMiddleware, MetadataRouter.clone);
+router.patch('/dataset/:dataset/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/metadata', isAuthenticatedMiddleware, authorizationMiddleware, MetadataRouter.delete);
 // widget
 router.get('/dataset/:dataset/widget/:widget/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/widget/:widget/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/widget/:widget/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
-router.delete('/dataset/:dataset/widget/:widget/metadata', authorizationMiddleware, MetadataRouter.delete);
+router.post('/dataset/:dataset/widget/:widget/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/widget/:widget/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/widget/:widget/metadata', isAuthenticatedMiddleware, authorizationMiddleware, MetadataRouter.delete);
 // layer
 router.get('/dataset/:dataset/layer/:layer/metadata', MetadataRouter.get);
-router.post('/dataset/:dataset/layer/:layer/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.create);
-router.patch('/dataset/:dataset/layer/:layer/metadata', validationMiddleware, authorizationMiddleware, MetadataRouter.update);
-router.delete('/dataset/:dataset/layer/:layer/metadata', authorizationMiddleware, MetadataRouter.delete);
+router.post('/dataset/:dataset/layer/:layer/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.create);
+router.patch('/dataset/:dataset/layer/:layer/metadata', isAuthenticatedMiddleware, validationMiddleware, authorizationMiddleware, MetadataRouter.update);
+router.delete('/dataset/:dataset/layer/:layer/metadata', isAuthenticatedMiddleware, authorizationMiddleware, MetadataRouter.delete);
 // generic
 router.get('/metadata', MetadataRouter.getAll);
 // find by id
