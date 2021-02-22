@@ -1,3 +1,7 @@
+## 22/02/2021
+
+- Update `rw-api-microservice-node` to fix issue with Fastly headers.
+
 ## 19/11/2020
 
 - Fix issue where metadata status could not be updated.
